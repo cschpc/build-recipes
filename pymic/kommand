@@ -1,0 +1,11 @@
+module purge
+module load intel/15.0.2 mkl/11.2.2 intelmpi/5.0.2
+
+module use $USERAPPL/modules
+module load python/2.7.10-icc
+module load cython/0.23
+
+export PYTHON_INCLUDES='-I/homeappl/home/louhivuo/appl_taito/python-2.7.10-icc/include/python2.7 -I/homeappl/home/louhivuo/appl_taito/python-2.7.10-icc/lib/python2.7/site-packages/numpy/core/include'
+
+make | tee loki-make
+
