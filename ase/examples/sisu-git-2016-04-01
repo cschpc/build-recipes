@@ -1,0 +1,16 @@
+# compile
+module swap PrgEnv-cray PrgEnv-gnu
+#module load scalable-python/1.1
+
+tgt=/appl/nano/ase/git-e9081a63
+
+python setup.py install --prefix=$tgt 2>&1 | tee loki-inst
+
+mv -i $tgt/lib64 $tgt/lib
+mv -i $tgt/lib/python2.6/site-packages $tgt/lib/python
+rmdir $tgt/lib/python2.6
+
+# fix permissions
+chmod -R g+rwX $tgt
+chmod -R o+rX $tgt
+
