@@ -1,0 +1,27 @@
+# fetch source code
+git clone git://github.com/cython/cython
+cd cython
+git checkout 0.23.4
+
+# load build environment
+module swap PrgEnv-cray PrgEnv-gnu
+module swap craype-haswell craype-sandybridge
+
+tgt=/appl/opt/python/scalable-python-1.1
+
+export MANPATH=$tgt/share/man:$MANPATH
+export PATH=$tgt/bin:$PATH
+export LD_LIBRARY_PATH=$tgt/lib:$LD_LIBRARY_PATH
+
+export PYTHONNOUSERSITE=1
+
+# compile
+export CC=cc
+export CFLAGS=-O2
+
+python setup.py install 2>&1 | tee loki-inst
+
+# fix permissions
+chmod -R g+rwX $tgt
+chmod -R o+rX $tgt
+
