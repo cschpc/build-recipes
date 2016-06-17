@@ -1,0 +1,15 @@
+# FIX COMPILE OPTIONS
+patch numpy/distutils/fcompiler/intel.py patch-intel.diff
+patch numpy/distutils/intelccompiler.py patch-intelcompiler.diff
+
+module purge
+module load intel/15.0.2 mkl/11.2.2 intelmpi/5.0.2
+
+TGT=/homeappl/home/louhivuo/appl_taito/python-2.7.10-mkl
+
+export PYTHONPATH=$TGT/lib/
+export PYTHONHOME=$TGT
+export PATH=$TGT/bin:$PATH
+
+$TGT/bin/python setup.py config --compiler=intelem build_clib --compiler=intelem build_ext --compiler=intelem install | tee loki-conf
+
