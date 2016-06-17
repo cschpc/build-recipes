@@ -1,7 +1,7 @@
 # load build environment
 module swap PrgEnv-cray PrgEnv-gnu
 module load cray-hdf5-parallel
-module load ase/git-test
+module load ase/git
 module load gpaw-setups/0.9.20000
 module load libxc/2.1.2
 module load scalable-python/1.1
