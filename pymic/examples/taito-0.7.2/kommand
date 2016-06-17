@@ -1,0 +1,25 @@
+# target
+base=$USERAPPL
+
+# load compile stack
+module use $USERAPPL/modules
+module load python/2.7.10-icc
+module load cython/0.23
+
+# set environment
+export PYTHON_INCLUDES='-I/homeappl/home/louhivuo/appl_taito/python-2.7.10-icc/include/python2.7 -I/homeappl/home/louhivuo/appl_taito/python-2.7.10-icc/lib/python2.7/site-packages/numpy/core/include'
+source ./env.sh
+sed -e "s|<TARGET>|$base/pymic|" setup/install-pymic.sh > install-pymic.sh
+
+# pymic
+python setup.py install --prefix=$base/pymic | tee loki-inst
+bash install-pymic.sh
+patch $base/pymic/env.sh setup/patch-pymic-env.diff
+
+# fix target
+cd $base/pymic
+mv -i lib/python2.7/site-packages/* lib/
+rmdir lib/python2.7/site-packages
+rmdir lib/python2.7
+cd -
+
