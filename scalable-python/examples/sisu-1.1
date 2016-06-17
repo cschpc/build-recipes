@@ -1,0 +1,33 @@
+module swap PrgEnv-cray PrgEnv-gnu
+
+export CXX=CC
+export CC=cc
+export FC=ftn
+export CFLAGS=-O2
+export CPPFLAGS=-O2
+
+export LINKFORSHARED='-Wl,-export-dynamic -dynamic'
+export MPI_LINKFORSHARED='-Wl,-export-dynamic -dynamic'
+
+export MPICC=cc
+export MPI_CPP=CC
+export MPI_CFLAGS=$CFLAGS
+export MPI_CPPFLAGS=$CPPFLAGS
+
+tgt=/appl/opt/python/scalable-python-1.1
+
+module swap craype-haswell craype-sandybridge
+
+./configure --prefix=$tgt --enable-mpi --disable-ipv6 --enable-unicode=ucs4  --with-external-python=/usr/bin/python 2>&1 | tee loki-conf
+
+make 2>&1 | tee loki-make
+make install 2>&1 | tee loki-inst
+
+module swap craype-sandybridge craype-haswell 
+
+make mpi 2>&1 | tee loki-make-mpi
+make install-mpi 2>&1 | tee loki-inst-mpi
+
+chmod -R g+rwX $tgt
+chmod -R o+rX $tgt
+
