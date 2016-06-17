@@ -1,0 +1,4 @@
+117c117
+<         return ['-xhost -openmp -fp-model strict']
+---
+>         return ['-O3 -xAVX -openmp -fp-model strict']

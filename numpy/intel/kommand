@@ -1,0 +1,21 @@
+# fetch source code
+git clone git://github.com/numpy/numpy.git
+cd numpy
+git checkout v1.9.2
+
+# FIX COMPILE OPTIONS
+patch numpy/distutils/fcompiler/intel.py patch-intel.diff
+patch numpy/distutils/intelccompiler.py patch-intelcompiler.diff
+
+module purge
+module load intel/16.0.0 mkl/11.3.0 intelmpi/5.1.1
+
+TGT=/homeappl/home/louhivuo/appl_taito/python-2.7.10
+tgt=/homeappl/home/louhivuo/appl_taito/git-numpy
+
+export PYTHONPATH=$TGT/lib/:/homeappl/home/louhivuo/appl_taito/cython-0.23/
+export PYTHONHOME=$TGT
+export PATH=$TGT/bin:/homeappl/home/louhivuo/appl_taito/cython-0.23/bin:$PATH
+
+$TGT/bin/python setup.py config --compiler=intelem build_clib --compiler=intelem build_ext --compiler=intelem install --prefix=$tgt | tee loki-conf
+
