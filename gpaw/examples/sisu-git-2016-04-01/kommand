@@ -1,0 +1,24 @@
+# load build environment
+module swap PrgEnv-cray PrgEnv-gnu
+module load cray-hdf5-parallel
+module load ase/git-test
+module load gpaw-setups/0.9.20000
+module load libxc/2.1.2
+module load scalable-python/1.1
+
+tgt=/appl/nano/gpaw/git-b77998bd
+
+# patch the test suite
+patch gpaw/test/test.py patch-testpy.diff
+patch gpaw/test/__init__.py patch-initpy.diff
+
+# install and fix dirs
+python setup.py install --customize=customize-gnu.py --prefix=$tgt 2>&1 | tee loki-inst
+
+mv -i $tgt/lib/python2.6/site-packages $tgt/lib/python
+rmdir $tgt/lib/python2.6
+
+# fix permissions
+chmod -R g+rwX $tgt
+chmod -R o+rX $tgt
+
