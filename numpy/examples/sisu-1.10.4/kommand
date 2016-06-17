@@ -1,0 +1,61 @@
+# Fetch source code
+git clone git://github.com/numpy/numpy.git
+cd numpy
+git checkout v1.10.4
+
+# Compile
+module swap PrgEnv-cray PrgEnv-gnu
+### Scalable Python
+# module load scalable-python-dev
+scapy=/appl/opt/python/scalable-python-1.1
+
+export MANPATH=$scapy/share/man:$MANPATH
+export PATH=$scapy/bin:$PATH
+export LD_LIBRARY_PATH=$scapy/lib:$LD_LIBRARY_PATH
+
+export PYTHONNOUSERSITE=1
+###
+
+export CXX=CC
+export CC=cc
+export FC=ftn
+export CFLAGS=-O2
+export CPPFLAGS=-O2
+
+export LINKFORSHARED='-Wl,-export-dynamic -dynamic'
+export MPI_LINKFORSHARED='-Wl,-export-dynamic -dynamic'
+
+export MPICC=cc
+export MPI_CPP=CC
+export MPI_CFLAGS=$CFLAGS
+export MPI_CPPFLAGS=$CPPFLAGS
+
+tgt=/appl/opt/python/numpy/1.10.4
+
+# HSW
+# module swap craype-sandybridge craype-haswell
+sed -e 's/<ARCH>/haswell/g' site.cfg-sisu-template >| site.cfg
+
+python setup.py install --prefix=$tgt/haswell 2>&1 | tee loki-inst-hsw
+
+mv -i $tgt/haswell/lib/python2.6/site-packages $tgt/haswell/lib/python
+rmdir $tgt/haswell/lib/python2.6
+
+mv -i build build-hsw
+
+
+# SNB
+module swap craype-haswell craype-sandybridge
+sed -e 's/<ARCH>/sandybridge/g' site.cfg-sisu-template >| site.cfg
+
+python setup.py install --prefix=$tgt/sandybridge 2>&1 | tee loki-inst-snb
+
+mv -i $tgt/sandybridge/lib/python2.6/site-packages $tgt/sandybridge/lib/python
+rmdir $tgt/sandybridge/lib/python2.6
+
+mv -i build build-snb
+
+
+chmod -R g+rwX $tgt
+chmod -R o+rX $tgt
+
