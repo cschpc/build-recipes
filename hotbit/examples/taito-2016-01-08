@@ -1,0 +1,12 @@
+#/bin/bash
+
+tgt=$USERAPPL/hotbit
+module load python-env/2.7.10 ase/3.6.0
+
+python setup.py install --customize --home=$tgt 2>&1 | tee loki-inst
+
+export HOTBIT_DIR=$tgt/lib/python
+export PATH="$tgt:$PATH"
+export HOTBIT_PARAMETERS=$tgt/param
+export PYTHONPATH="$PYTHONPATH:$HOTBIT_DIR"
+
