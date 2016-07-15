@@ -1,0 +1,4 @@
+175c175
+<     : removed_(atoms.nr, 0)
+---
+>     : removed_(atoms.nr)

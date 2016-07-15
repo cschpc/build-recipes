@@ -1,0 +1,26 @@
+519,520c519,520
+<             if (bNtOmpOptionSet)
+<             {
+---
+> //            if (bNtOmpOptionSet)
+> //            {
+522,530c522,530
+<             }
+<             else
+<             {
+<                 /* This fatal error, and the one below, is nasty, but it's
+<                  * probably the only way to ensure that all users don't waste
+<                  * a lot of resources, since many users don't read logs/stderr.
+<                  */
+<                 gmx_fatal(FARGS, "%s If you want to run with this setup, specify the -ntomp option. But we suggest to change the number of MPI ranks%s.", buf, mpi_option);
+<             }
+---
+> //            }
+> //            else
+> //            {
+> //                /* This fatal error, and the one below, is nasty, but it's
+> //                 * probably the only way to ensure that all users don't waste
+> //                 * a lot of resources, since many users don't read logs/stderr.
+> //                 */
+> //                gmx_fatal(FARGS, "%s If you want to run with this setup, specify the -ntomp option. But we suggest to change the number of MPI ranks%s.", buf, mpi_option);
+> //            }

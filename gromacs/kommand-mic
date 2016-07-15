@@ -1,14 +1,18 @@
+# mods to source code (bugfix + disable silly MPI limitation)
+patch ../src/gromacs/topology/atomsbuilder.cpp patch-atomsbuilder.diff
+patch ../src/programs/mdrun/resource-division.cpp patch-resource-division.diff
+
+# target
+tgt=/appl/chem/gromacs/5.1.2-mic/
+
+# setup build environment
 module purge
 module load intel/16.0.0 mkl/11.3.0 intelmpi/5.1.1
-
-alias cmake=cmake28
-
-tgt=/appl/chem/gromacs/5.1.1-mic/
-
 export MKL_INCLUDE_DIR=$MKLROOT/include
 export MKL_LIBRARIES=$MKLROOT/lib/intel64
-#export MKL_LIBRARIES="-L${MKLROOT}/lib/intel64 -lmkl_intel_lp64  -lmkl_sequential -lmkl_core -lpthread -lm"
+alias cmake=cmake28
 
+mkdir base xeon mic
 cd base
 
 cmake ../.. -DCMAKE_INSTALL_PREFIX=$tgt \
@@ -58,7 +62,7 @@ module load intel/16.0.0 mkl/11.3.0 intelmpi/5.1.1
 
 alias cmake=cmake28
 
-tgt=/appl/chem/gromacs/5.1.1-mic/
+tgt=/appl/chem/gromacs/5.1.2-mic/
 
 export MKL_INCLUDE_DIR=$MKLROOT/include
 export MKL_LIBRARIES="${MKLROOT}/lib/mic"
