@@ -1,0 +1,89 @@
+# mods to source code (bugfix + disable silly MPI limitation)
+patch ../src/gromacs/topology/atomsbuilder.cpp patch-atomsbuilder.diff  
+patch ../src/programs/mdrun/resource-division.cpp patch-resource-division.diff
+
+# target
+tgt=/scratch/work/user/louhivuo/lib-2016.01/gromacs-5.1.1-mic
+
+# setup build environment
+module load intel/2016.01
+export MKL_INCLUDE_DIR=$MKLROOT/include
+export MKL_LIBRARIES=$MKLROOT/lib/intel64
+
+mkdir base xeon mic
+cd base
+
+cmake ../.. -DCMAKE_INSTALL_PREFIX=$tgt \
+  -DBUILD_SHARED_LIBS=OFF \
+  -DGMX_PREFER_STATIC_LIBS=ON \
+  -DGMX_FFT_LIBRARY=mkl \
+  -DGMX_OPENMP=ON \
+  -DGMX_GPU=OFF \
+  -DGMX_SOFTWARE_INVSQRT=OFF \
+  -DCMAKE_EXE_LINKER_FLAGS="-mkl=sequential" \
+  -DCMAKE_C_COMPILER=mpicc \
+  -DCMAKE_C_FLAGS="-O3 -xAVX -opt-prefetch -unroll-aggressive -no-prec-div -fp-model fast=2 -g" \
+  -DCMAKE_CXX_COMPILER=mpicxx \
+  -DCMAKE_CXX_FLAGS="-O3 -xAVX -opt-prefetch -unroll-aggressive -no-prec-div -fp-model fast=2 -g" \
+2>&1 | tee ../conf-base.log
+
+make -j 10 install 2>&1 | tee ../make-base.log
+cd ../xeon
+
+cmake ../.. -DCMAKE_INSTALL_PREFIX=$tgt \
+  -DBUILD_SHARED_LIBS=OFF \
+  -DGMX_PREFER_STATIC_LIBS=ON \
+  -DGMX_BUILD_MDRUN_ONLY=ON \
+  -DGMX_FFT_LIBRARY=mkl \
+  -DGMX_MPI=ON \
+  -DGMX_OPENMP=ON \
+  -DGMX_GPU=OFF \
+  -DGMX_SOFTWARE_INVSQRT=OFF \
+  -DGMX_SKIP_DEFAULT_CFLAGS=ON \
+  -DCMAKE_EXE_LINKER_FLAGS="-mkl=sequential" \
+  -DCMAKE_C_COMPILER=mpicc \
+  -DCMAKE_C_FLAGS="-O3 -xAVX -opt-prefetch -unroll-aggressive -no-prec-div -fp-model fast=2 -g" \
+  -DCMAKE_CXX_COMPILER=mpicxx \
+  -DCMAKE_CXX_FLAGS="-std=c++0x -O3 -xAVX -opt-prefetch -unroll-aggressive -no-prec-div -fp-model fast=2 -g" \
+2>&1 | tee ../conf-xeon.log
+
+make -j 10 install 2>&1 | tee ../make-xeon.log
+cd ../mic
+
+####
+qsub -I -q qexp -l select=1:ncpus=24:accelerator=True:naccelerators=2:accelerator_model=phi7120 -A DD-15-41
+(cd to dir)
+
+module load intel/2016.01
+
+tgt=/scratch/work/user/louhivuo/lib-2016.01/gromacs-5.1.1-mic
+
+export MKL_INCLUDE_DIR=$MKLROOT/include
+export MKL_LIBRARIES="${MKLROOT}/lib/mic"
+
+alias cmake=/scratch/work/user/louhivuo/build/cmake-3.4.1/bin/cmake
+
+###
+
+cmake ../.. -DCMAKE_INSTALL_PREFIX=$tgt \
+  -DGMX_DEFAULT_SUFFIX=OFF -DGMX_BINARY_SUFFIX=_mic \
+  -DBUILD_SHARED_LIBS=OFF \
+  -DGMX_PREFER_STATIC_LIBS=ON \
+  -DGMX_BUILD_MDRUN_ONLY=ON \
+  -DGMX_FFT_LIBRARY=mkl \
+  -DGMX_MPI=ON \
+  -DGMX_OPENMP=ON \
+  -DGMX_GPU=OFF \
+  -DGMX_SOFTWARE_INVSQRT=OFF \
+  -DGMX_SKIP_DEFAULT_CFLAGS=ON \
+  -DCMAKE_EXE_LINKER_FLAGS="-mmic -mkl=sequential" \
+  -DCMAKE_C_COMPILER=mpicc \
+  -DCMAKE_C_FLAGS="-O3 -mmic -opt-prefetch -unroll-aggressive -no-prec-div -fp-model fast=2 -g" \
+  -DCMAKE_CXX_COMPILER=mpicxx \
+  -DCMAKE_MPI_CXX_LIBRARIES=" "\
+  -DMPI_CXX_LIBRARIES=" "\
+  -DCMAKE_CXX_FLAGS="-std=c++0x -O3 -mmic -opt-prefetch -unroll-aggressive -no-prec-div -fp-model fast=2 -g" \
+2>&1 | tee ../conf-mic.log
+
+make -j 10 install 2>&1 | tee ../make-mic.log
+
