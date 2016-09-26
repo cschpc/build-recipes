@@ -1,20 +1,27 @@
-# Fetch source code
-git clone git://github.com/numpy/numpy.git
-cd numpy
-git checkout v1.10.4
+# Volatile version numbers
+numpy_version=1.11.1
+libsci_version=16.03.1
 
-# Compile
+# Fetch source code
+git clone git://github.com/numpy/numpy.git numpy-$numpy_version
+cd numpy-$numpy_version
+git checkout v$numpy_version
+
+# Setup build environment
 module swap PrgEnv-cray PrgEnv-gnu
 ### Scalable Python
 # module load scalable-python-dev
-scapy=/appl/opt/python/scalable-python-1.1
+scapy=/appl/opt/python/scalable-python-1.1-v2
 
 export MANPATH=$scapy/share/man:$MANPATH
 export PATH=$scapy/bin:$PATH
-export LD_LIBRARY_PATH=$scapy/lib:$LD_LIBRARY_PATH
+#export LD_LIBRARY_PATH=$scapy/lib:$LD_LIBRARY_PATH
 
 export PYTHONNOUSERSITE=1
 ###
+
+export CRAYPE_LINK_TYPE=dynamic
+export CRAY_ADD_RPATH=yes
 
 export CXX=CC
 export CC=cc
@@ -30,13 +37,14 @@ export MPI_CPP=CC
 export MPI_CFLAGS=$CFLAGS
 export MPI_CPPFLAGS=$CPPFLAGS
 
-tgt=/appl/opt/python/numpy/1.10.4
+tgt=/appl/opt/python/numpy/$numpy_version
 
 # HSW
 # module swap craype-sandybridge craype-haswell
-sed -e 's/<ARCH>/haswell/g' site.cfg-sisu-template >| site.cfg
+sed -e 's/<ARCH>/haswell/g' -e "s/<LIBSCI>/$libsci_version/g" site.cfg-sisu-template >| site.cfg
 
-python setup.py install --prefix=$tgt/haswell 2>&1 | tee loki-inst-hsw
+export PYTHONPATH=$tgt/haswell/lib/python2.6/site-packages
+python setup.py build -j 4 install --prefix=$tgt/haswell 2>&1 | tee loki-inst-hsw
 
 mv -i $tgt/haswell/lib/python2.6/site-packages $tgt/haswell/lib/python
 rmdir $tgt/haswell/lib/python2.6
@@ -45,10 +53,13 @@ mv -i build build-hsw
 
 
 # SNB
+git clean -Xdf
 module swap craype-haswell craype-sandybridge
-sed -e 's/<ARCH>/sandybridge/g' site.cfg-sisu-template >| site.cfg
+sed -e 's/<ARCH>/sandybridge/g' -e "s/<LIBSCI>/$libsci_version/g" site.cfg-sisu-template >| site.cfg
 
-python setup.py install --prefix=$tgt/sandybridge 2>&1 | tee loki-inst-snb
+export PYTHONPATH=$tgt/sandybridge/lib/python2.6/site-packages
+mkdir -p $tgt/sandybridge/lib/python2.6/site-packages
+python setup.py build -j 4 install --prefix=$tgt/sandybridge 2>&1 | tee loki-inst-snb
 
 mv -i $tgt/sandybridge/lib/python2.6/site-packages $tgt/sandybridge/lib/python
 rmdir $tgt/sandybridge/lib/python2.6

@@ -1,0 +1,19 @@
+tgt=/appl/opt/python/scalable-python-1.1-v2
+tmp=./.tmp-build-dir
+site_pkg=lib/python2.6/site-packages
+
+export MANPATH=$tgt/share/man:$MANPATH
+export PATH=$tgt/bin:$PATH
+export LD_LIBRARY_PATH=$tgt/lib:$LD_LIBRARY_PATH
+
+export PYTHONNOUSERSITE=1
+
+mkdir $tmp
+python setup.py install --single-version-externally-managed --root=$tmp/ 2>&1 | tee loki-inst
+
+mv -i $tmp/$tgt/$site_pkg/setuptools $tgt/$site_pkg/
+rm -rf $tmp
+
+chmod -R g+rwX $tgt
+chmod -R o+rX $tgt
+
