@@ -1,5 +1,8 @@
 module swap PrgEnv-cray PrgEnv-gnu
 
+export CRAYPE_LINK_TYPE=dynamic
+export CRAY_ADD_RPATH=yes
+
 export CXX=CC
 export CC=cc
 export FC=ftn
@@ -14,7 +17,7 @@ export MPI_CPP=CC
 export MPI_CFLAGS=$CFLAGS
 export MPI_CPPFLAGS=$CPPFLAGS
 
-tgt=/appl/opt/python/scalable-python-1.1
+tgt=/appl/opt/python/scalable-python-1.1-v2
 
 module swap craype-haswell craype-sandybridge
 
