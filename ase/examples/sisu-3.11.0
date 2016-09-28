@@ -1,0 +1,31 @@
+# volatile version number
+ase_version=3.11.0
+
+# get source code
+git clone https://gitlab.com/ase/ase.git ase-$ase_version
+cd ase-$ase_version
+git checkout $ase_version
+
+# load build environment
+module swap PrgEnv-cray PrgEnv-gnu
+
+# load Scalable Python
+# (instead of module load scalable-python/1.1)
+scapy=/appl/opt/python/scalable-python-2016-09
+export MANPATH=$scapy/share/man:$MANPATH
+export PATH=$scapy/bin:$PATH
+export LD_LIBRARY_PATH=$scapy/lib:$LD_LIBRARY_PATH
+export PYTHONNOUSERSITE=1
+
+# set target directory
+tgt=/appl/nano/ase/$ase_version
+
+# install and fix dirs
+python setup.py install --prefix=$tgt 2>&1 | tee loki-inst
+mv -i $tgt/lib/python2.6/site-packages $tgt/lib/python
+rmdir $tgt/lib/python2.6
+
+# fix permissions
+chmod -R g+rwX $tgt
+chmod -R o+rX $tgt
+
