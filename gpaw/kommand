@@ -1,3 +1,11 @@
+# volatile version number
+gpaw_version=1.1.0
+
+# get source code
+git clone https://gitlab.com/gpaw/gpaw.git gpaw-$gpaw_version
+cd gpaw-$gpaw_version
+git checkout $gpaw_version
+
 # load build environment
 module swap PrgEnv-cray PrgEnv-gnu
 module load cray-hdf5-parallel
@@ -6,7 +14,8 @@ module load gpaw-setups/0.9.11271
 module load libxc/2.1.3
 module load scalable-python/1.1
 
-tgt=/appl/nano/gpaw/1.1.0
+# set target directory
+tgt=/appl/nano/gpaw/$gpaw_version
 
 # patch the test suite
 patch gpaw/test/test.py patch-testpy.diff
