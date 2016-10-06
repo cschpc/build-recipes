@@ -1,12 +1,12 @@
 [atlas]
 atlas_libs = sci_gnu
-library_dirs = /opt/cray/libsci/13.3.0/gnu/5.1/<ARCH>/lib
-include_dirs = /opt/cray/libsci/13.3.0/gnu/5.1/<ARCH>/include
+library_dirs = /opt/cray/libsci/<LIBSCI>/gnu/5.1/<ARCH>/lib
+include_dirs = /opt/cray/libsci/<LIBSCI>/gnu/5.1/<ARCH>/include
 [lapack_atlas]
 lapack_libs = sci_gnu
-library_dirs = /opt/cray/libsci/13.3.0/gnu/5.1/<ARCH>/lib
-include_dirs = /opt/cray/libsci/13.3.0/gnu/5.1/<ARCH>/include
+library_dirs = /opt/cray/libsci/<LIBSCI>/gnu/5.1/<ARCH>/lib
+include_dirs = /opt/cray/libsci/<LIBSCI>/gnu/5.1/<ARCH>/include
 [lapack]
 lapack_libs = sci_gnu
-library_dirs = /opt/cray/libsci/13.3.0/gnu/5.1/<ARCH>/lib
-include_dirs = /opt/cray/libsci/13.3.0/gnu/5.1/<ARCH>/include
+library_dirs = /opt/cray/libsci/<LIBSCI>/gnu/5.1/<ARCH>/lib
+include_dirs = /opt/cray/libsci/<LIBSCI>/gnu/5.1/<ARCH>/include
