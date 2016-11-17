@@ -1,0 +1,53 @@
+# set up build environment
+module swap PrgEnv-cray PrgEnv-gnu
+module load fftw/3.3.4.7
+module load autotools
+
+export CRAYPE_LINK_TYPE=dynamic
+export CRAY_ADD_RPATH=yes
+
+export CC=cc
+export CXX=CC
+export FC=ftn
+export CFLAGS="-O3 -ffast-math -funroll-loops -march=haswell -mtune=haswell -mavx2 -fPIC -dynamic"
+export CXXFLAGS=$CFLAGS
+export FCFLAGS=$CFLAGS
+
+# target location
+tgt=/appl/nano/libvdwxc/git-2420ab74
+
+
+### libvdwxc ###
+# get source code
+git clone https://gitlab.com/libvdwxc/libvdwxc.git
+cd libvdwxc
+
+# generate configure script
+./autogen.sh
+
+# build and install
+./configure --prefix=$tgt --with-pfft=$tgt 2>&1 | tee loki-conf
+make 2>&1 | tee loki-make
+make install 2>&1 | tee loki-inst
+cd ..
+
+
+### PFFT ###
+# get source code
+git clone https://github.com/mpip/pfft
+cd pfft
+
+# generate configure script
+./bootstrap.sh
+
+# build and install
+./configure --prefix=$tgt 2>&1 | tee loki-conf
+make 2>&1 | tee loki-make
+make install 2>&1 | tee loki-inst
+cd ..
+
+
+# fix permissions
+chmod -R g+rwX $tgt
+chmod -R o+rX $tgt
+
