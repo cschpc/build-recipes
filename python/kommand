@@ -1,0 +1,41 @@
+# fetch source code
+git clone https://github.com/python/cpython
+cd cpython
+
+# checkout correct version
+#  2.7.13 -- 1df28e086c0d28f87e0bd2a35f323709e8066392
+git checkout 1df28e086c0d28f87e0bd2a35f323709e8066392
+
+# setup build environment
+module swap PrgEnv-cray PrgEnv-gnu
+module swap craype-haswell craype-sandybridge
+
+export CRAYPE_LINK_TYPE=dynamic
+export CRAY_ADD_RPATH=yes
+
+export CXX=CC
+export CC=cc
+export FC=ftn
+export CFLAGS=-O2
+export CPPFLAGS=-O2
+
+export LINKFORSHARED='-Wl,-export-dynamic -dynamic'
+export MPI_LINKFORSHARED='-Wl,-export-dynamic -dynamic'
+
+export MPICC=cc
+export MPI_CPP=CC
+export MPI_CFLAGS=$CFLAGS
+export MPI_CPPFLAGS=$CPPFLAGS
+
+# target directory for installation
+tgt=/appl/opt/python/cpython-2017-01
+
+# build and install
+./configure --prefix=$tgt --disable-ipv6 --enable-unicode=ucs4 2>&1 | tee loki-conf
+make 2>&1 | tee loki-make
+make install 2>&1 | tee loki-inst
+
+# fix permissions
+chmod -R g+rwX $tgt
+chmod -R o+rX $tgt
+
