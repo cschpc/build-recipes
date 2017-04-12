@@ -1,0 +1,99 @@
+# target
+base=/work/knl-users/louhivuo/lib/gpaw-stack-2017-03
+
+# load compile stack
+module swap PrgEnv-cray PrgEnv-intel/6.0.3
+export CC=cc
+export MPICC=cc
+
+export CRAYPE_LINK_TYPE=dynamic
+export CRAY_ADD_RPATH=yes
+
+# swap to SNB craype
+module swap craype-mic-knl craype-sandybridge
+#module swap craype-network-aries craype-network-none
+
+# python
+tar xvfz src/Python-2.7.10.tgz
+cd Python-2.7.10
+./configure --prefix=$base/python-2.7.10 --without-gcc --enable-unicode=ucs4 | tee loki-conf
+make | tee loki-make
+make install | tee loki-inst
+cd ..
+export PYTHONHOME=$base/python-2.7.10
+export PYTHONPATH=$base/python-2.7.10/lib
+export PATH=$base/python-2.7.10/bin:$PATH
+
+# nose
+tar xvfz src/nose-1.3.7.tar.gz
+cd nose-1.3.7
+python setup.py install | tee loki-inst
+cd ..
+
+# ASE
+tar xvfz src/python-ase-3.9.1.4567.tar.gz
+cd python-ase-3.9.1.4567
+python setup.py install --prefix=$base/ase-3.9.1 | tee loki-inst
+cd ..
+cd $base/ase-3.9.1
+mv -i lib/python2.7/site-packages/* lib/
+rmdir lib/python2.7/site-packages
+rmdir lib/python2.7
+cd -
+export PYTHONPATH=$base/ase-3.9.1/lib:$PYTHONPATH
+export PATH=$base/ase-3.9.1/bin:$PATH
+
+# cython
+tar xvfz src/Cython-0.23.tar.gz
+cp -r Cython-0.23 $base/cython-0.23
+export PYTHONPATH=$base/cython-0.23:$PYTHONPATH
+export PATH=$base/cython-0.23/bin:$PATH
+
+# gpaw-setups
+tar xvfz src/gpaw-setups-0.9.11271.tar.gz
+cp -r gpaw-setups-0.9.11271 $base/gpaw-setups-0.9.11271
+export GPAW_SETUP_PATH=$base/gpaw-setups-0.9.11271
+
+# libxc
+tar xvfz src/libxc-2.1.2.tar.gz
+cd libxc-2.1.2
+./configure --prefix=$base/libxc-2.1.2 --enable-shared | tee loki-conf
+make | tee loki-make
+make install | tee loki-inst
+cd ..
+export LIBXCDIR=$base/libxc-2.1.2
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:$base/libxc-2.1.2/lib
+
+# numpy
+tar xvfz src/numpy-1.9.2.tar.gz
+cp setup/site.cfg numpy-1.9.2/
+cd numpy-1.9.2
+patch numpy/distutils/fcompiler/intel.py ../setup/patch-intel.diff
+patch numpy/distutils/intelccompiler.py ../setup/patch-intelcompiler.diff
+python setup.py config --compiler=intelem build_clib --compiler=intelem build_ext --compiler=intelem install | tee loki-inst
+cd ..
+
+# swap to KNL craype and use memkind
+module swap craype-sandybridge craype-mic-knl 
+module load cray-memkind
+
+# gpaw
+gpaw_version=0.11.0
+git clone https://gitlab.com/gpaw/gpaw.git gpaw-$gpaw_version
+cd gpaw-$gpaw_version
+git checkout $gpaw_version
+#patch gpaw/test/test.py patch-testpy.diff
+patch gpaw/test/__init__.py ../setup/patch-initpy.diff
+cp ../setup/customize-knl.py .
+#python setup.py install --customize=customize-knl.py --ignore-numpy --prefix=$base/gpaw-$gpaw_version 2>&1 | tee loki-inst
+python setup.py install --customize=customize-knl.py --prefix=$base/gpaw-$gpaw_version 2>&1 | tee loki-inst
+cd ..
+cd $base/gpaw-$gpaw_version
+mv -i lib/python2.7/site-packages lib/python
+rmdir lib/python2.7
+cd -
+
+# set up a script for loading the stack
+sed -e "s|<BASE>|$base|" \
+    -e "s|<GPAW>|$gpaw_version|" setup/load.sh > $base/load.sh
+
