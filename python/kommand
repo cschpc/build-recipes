@@ -3,8 +3,8 @@ git clone https://github.com/python/cpython
 cd cpython
 
 # checkout correct version
-#  2.7.13 -- 1df28e086c0d28f87e0bd2a35f323709e8066392
-git checkout 1df28e086c0d28f87e0bd2a35f323709e8066392
+#  2.7.13 -- 9c1426de7521299f70eb5483e7e25d1c2a73dbbd
+git checkout 9c1426de7521299f70eb5483e7e25d1c2a73dbbd
 
 # setup build environment
 module swap PrgEnv-cray PrgEnv-gnu
