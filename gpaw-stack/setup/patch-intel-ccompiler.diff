@@ -1,0 +1,10 @@
+35,36c35,36
+<     cc_exe = 'icc -m64 -fPIC'
+<     cc_args = "-fPIC"
+---
+>     cc_exe = 'cc <CFLAGS>'
+>     cc_args = "<CFLAGS>"
+39c39
+<         self.cc_exe = 'icc -m64 -fPIC'
+---
+>         self.cc_exe = 'cc <CFLAGS>'
