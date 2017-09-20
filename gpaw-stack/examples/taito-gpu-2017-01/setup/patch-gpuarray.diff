@@ -1,0 +1,14 @@
+diff --git a/gpaw/gpuarray.py b/gpaw/gpuarray.py
+index 3f295c7..dac58bc 100755
+--- a/gpaw/gpuarray.py
++++ b/gpaw/gpuarray.py
+@@ -15,9 +15,6 @@ except StandardError as import_error:
+             raise self.import_error
+     sys.modules[__name__] = Wrapper()
+ else:
+-    if VERSION != (2012,1):
+-        from pycuda import VERSION_TEXT
+-        raise ImportError('Unsupported PyCUDA %s version! Version 2012.1 needed.' % VERSION_TEXT)
+     import pycuda.elementwise as elementwise        
+     from pytools import memoize, memoize_method
+     import pycuda.driver as drv
