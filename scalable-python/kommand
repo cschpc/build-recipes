@@ -1,5 +1,5 @@
 # fetch source code
-git clone git://github.com/CSC-IT-Center-for-Science/scalable-python.git
+git clone https://github.com/CSCfi/scalable-python.git
 cd scalable-python
 
 # setup build environment
@@ -23,7 +23,7 @@ export MPI_CFLAGS=$CFLAGS
 export MPI_CPPFLAGS=$CPPFLAGS
 
 # target directory for installation
-tgt=/appl/opt/python/scalable-python-2016-09
+tgt=/appl/opt/python/scalable-python-2017-09
 
 # build non-MPI python for front-end nodes
 module swap craype-haswell craype-sandybridge
