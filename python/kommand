@@ -35,6 +35,9 @@ tgt=/appl/opt/python/cpython-2017-01
 make 2>&1 | tee loki-make
 make install 2>&1 | tee loki-inst
 
+# setup load script
+sed -e "s|<BASE>|$tgt|g" load.sh > $tgt/load.sh
+
 # fix permissions
 chmod -R g+rwX $tgt
 chmod -R o+rX $tgt
