@@ -23,12 +23,12 @@ export MPI_CFLAGS=$CFLAGS
 export MPI_CPPFLAGS=$CPPFLAGS
 
 # target directory for installation
-tgt=/appl/opt/python/scalable-python-2017-09
+tgt=/appl/opt/python/scalable-python-2017-10
 
 # build non-MPI python for front-end nodes
 module swap craype-haswell craype-sandybridge
 
-./configure --prefix=$tgt --enable-mpi --disable-ipv6 --enable-unicode=ucs4  --with-external-python=/usr/bin/python 2>&1 | tee loki-conf
+./configure --prefix=$tgt --enable-mpi --disable-ipv6 --enable-unicode=ucs4 --with-ensurepip=install 2>&1 | tee loki-conf
 
 make 2>&1 | tee loki-make
 make install 2>&1 | tee loki-inst
@@ -38,6 +38,9 @@ module swap craype-sandybridge craype-haswell
 
 make mpi 2>&1 | tee loki-make-mpi
 make install-mpi 2>&1 | tee loki-inst-mpi
+
+# setup load script
+sed -e "s|<BASE>|$tgt|g" load.sh > $tgt/load.sh
 
 # fix permissions
 chmod -R g+rwX $tgt
