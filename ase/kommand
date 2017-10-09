@@ -1,3 +1,6 @@
+### Continue directly after ../python-extra/kommand
+###   i.e. $tgt points to the install dir of Python
+
 # volatile version number
 ase_version=3.13.0
 
@@ -6,15 +9,10 @@ git clone https://gitlab.com/ase/ase.git ase-$ase_version
 cd ase-$ase_version
 git checkout $ase_version
 
-# load build environment
-module swap PrgEnv-cray PrgEnv-gnu
-module load scalable-python/1.2
-
-# set target directory
-tgt=/appl/nano/ase/$ase_version
+# load Python environment (and set PYTHONUSERBASE)
+source $tgt/load.sh 2017-02
 
 # install and fix dirs
-export PYTHONUSERBASE=$tgt
 python setup.py install --user 2>&1 | tee loki-inst
 
 # fix permissions
