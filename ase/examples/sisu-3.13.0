@@ -1,0 +1,21 @@
+### Continue directly after ../python-extra/kommand
+###   i.e. $tgt points to the install dir of Python
+
+# volatile version number
+ase_version=3.13.0
+
+# get source code
+git clone https://gitlab.com/ase/ase.git ase-$ase_version
+cd ase-$ase_version
+git checkout $ase_version
+
+# load Python environment (and set PYTHONUSERBASE)
+source $tgt/load.sh 2017-02
+
+# install and fix dirs
+python setup.py install --user 2>&1 | tee loki-inst
+
+# fix permissions
+chmod -R g+rwX $tgt
+chmod -R o+rX $tgt
+
