@@ -6,50 +6,54 @@ import sys
 from subprocess import call
 from glob import glob
 
-args2change = {"-fno-strict-aliasing":"",
-              "-fmessage-length=0":"",
-              "-fstack-protector":"",
-              "-funwind-tables":"",
-              "-fasynchronous-unwind-tables":"",
-              "-fwrapv":"",
-              "-Wall":"",
-              # "-std=c99":"",
-              # "-fPIC":"",
-              # "-g":"",
-              "-D_FORTIFY_SOURCE=2":"",
-              "-DNDEBUG":"",
-              "-UNDEBUG":"",
-              # "-pthread":"",
-              # "-shared":":",
-              # "-Xlinker":"",
-              # "-export-dynamic":"",
-              "-Wstrict-prototypes":"",
-              "-dynamic":"-dynamic",
-              "-O3":"",
-              "-O3":"",
-              "-O2":"",
-              "-O1":""}
+args2change = {
+        '-fno-strict-aliasing':'',
+        '-Wall':'',
+        '-Wstrict-prototypes':'',
+        '-DNDEBUG':'',
+        '-UNDEBUG':''
+        }
+fragile_files = []
 
-fragile_files = ['c/xc/tpss.c']
+optimise = None  # optimisation level 0/1/2/3
+debug = False    # use -g or not
+fragile = False  # use special flags for current file?
 
-cmd = ""
-fragile = False
-opt = 1
+# process arguments
+args = []
 for arg in sys.argv[1:]:
-   cmd += " "
-   t = arg.strip()
-   if t in fragile_files:
-       opt = 2
-   if t in args2change:
-       cmd += args2change[t]
-   else:
-       cmd += arg
+    arg = arg.strip()
+    if arg.startswith('-O'):
+        level = int(arg.replace('-O',''))
+        if not optimise or level > optimise:
+            optimise = level
+    elif arg == '-g':
+        debug = True
+    elif arg in args2change:
+        if args2change[arg]:
+            args.append(args2change[arg])
+    else:
+        if arg in fragile_files:
+            fragile = True
+        args.append(arg)
 
-flags_list = {1: "-O3 -funroll-loops -mavx",
-             2: "-O2",
-             }
+# set default optimisation level and flags
+if fragile:
+    optimise = min(2, optimise)
+    flags = []
+else:
+    optimise = max(3, optimise)
+    flags = ['-funroll-loops', '-mavx2']
 
-flags = flags_list[opt]
-cmd = "cc %s %s"%(flags, cmd)
+# add optimisation level to flags
+if optimise is not None:
+    flags.insert(0, '-O{0}'.format(optimise))
+# make sure -g is always the _first_ flag, so it doesn't mess e.g. with the
+# optimisation level
+if debug:
+    flags.insert(0, '-g')
 
+# construct and execute the compile command
+cmd = 'cc {0} {1}'.format(' '.join(flags), ' '.join(args))
+print(cmd)
 call(cmd, shell=True)
