@@ -1,8 +1,8 @@
 diff --git a/gpaw/test/test.py b/gpaw/test/test.py
-index 4bd48ad..9876392 100644
+index 0413d0c..384d6f0 100644
 --- a/gpaw/test/test.py
 +++ b/gpaw/test/test.py
-@@ -94,6 +94,8 @@ def main(args=None):
+@@ -101,6 +101,8 @@ def main(args):
  
      from gpaw.test import TestRunner
  
