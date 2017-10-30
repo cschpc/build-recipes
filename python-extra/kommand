@@ -2,59 +2,40 @@
 ###   i.e. $tgt points to the install dir of Scalable Python
 
 # volatile version numbers
-cython_version=0.23.4
-numpy_version=1.11.1
+cython_version=0.26.1
+numpy_version=1.12.1
 scipy_version=0.18.1
 mpi4py_version=2.0.0
-libsci_version=16.03.1
+libsci_version=16.11.1
 
 # load Scalable Python
-export MANPATH=$tgt/share/man:$MANPATH
-export PATH=$tgt/bin:$PATH
-export LD_LIBRARY_PATH=$tgt/lib:$LD_LIBRARY_PATH
-export PYTHONNOUSERSITE=1
+source $tgt/load.sh
 
-# nose
-tar xvfz ~/nose-1.3.7.tar.gz
-cd nose-1.3.7
-python setup.py install 2>&1 | tee loki-inst
-cd ..
+# install generic modules (only once!)
+pip install nose
 
-# cython
-git clone git://github.com/cython/cython cython-$cython_version
-cd cython-$cython_version
-git checkout $cython_version
-module swap craype-haswell craype-sandybridge
-python setup.py install 2>&1 | tee loki-inst
-cd ..
+# isolate other modules using PYTHONUSERBASE
+export PYTHONUSERBASE=$tgt/bundle/2017-02
+mkdir -p $PYTHONUSERBASE/lib/python2.7/site-packages
 
-# setuptools
-tar xvfz ~/setuptools-27.3.0.tar.gz
-cd setuptools-27.3.0
-python setup.py install 2>&1 | tee loki-inst
-cd ..
+# cython + mpi4py
+pip install --user cython
+pip install --user mpi4py
 
 # numpy
 git clone git://github.com/numpy/numpy.git numpy-$numpy_version
 cd numpy-$numpy_version
 git checkout v$numpy_version
-module swap craype-sandybridge craype-haswell
 sed -e 's/<ARCH>/haswell/g' -e "s/<LIBSCI>/$libsci_version/g" ../site.cfg-sisu-template >| site.cfg
-python setup.py build -j 4 install 2>&1 | tee loki-inst-hsw
+python setup.py build -j 4 install --user 2>&1 | tee loki-inst
 cd ..
 
 # scipy
 git clone git://github.com/scipy/scipy.git scipy-$scipy_version
 cd scipy-$scipy_version
 git checkout v$scipy_version
-python setup.py build -j 4 install 2>&1 | tee loki-inst-hsw
+python setup.py build -j 4 install --user 2>&1 | tee loki-inst
 cd ..
-
-# mpi4py
-git clone https://bitbucket.org/mpi4py/mpi4py.git mpi4py-$mpi4py_version
-cd mpi4py-$mpi4py_version
-git checkout $mpi4py_version
-python setup.py install 2>&1 | tee loki-inst
 
 # fix permissions
 chmod -R g+rwX $tgt
