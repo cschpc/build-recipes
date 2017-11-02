@@ -1,0 +1,50 @@
+### Continue directly after ../scalable-python/kommand
+###   i.e. $tgt points to the install dir of Scalable Python
+
+# volatile version numbers
+cython_version=0.26.1
+numpy_version=1.12.1
+scipy_version=0.18.1
+mpi4py_version=2.0.0
+libsci_version=16.11.1
+
+# load Scalable Python
+source $tgt/load.sh
+export CFLAGS="-fPIC $CFLAGS"
+export FFLAGS="-fPIC $FFLAGS"
+
+# install generic modules (only once!)
+python -m ensurepip
+pip install nose
+
+# isolate other modules using PYTHONUSERBASE
+export PYTHONUSERBASE=$tgt/bundle/2017-02
+mkdir -p $PYTHONUSERBASE/lib/python2.7/site-packages
+
+# cython + mpi4py
+pip install --user cython
+pip install --user mpi4py
+
+# numpy
+git clone git://github.com/numpy/numpy.git numpy-$numpy_version
+cd numpy-$numpy_version
+git checkout v$numpy_version
+sed -e "s|<MKLROOT>|$MKLROOT|g" ../site.cfg-taito-template > site.cfg
+sed -e "s|<FFLAGS>|$FFLAGS|g" ../patch-intel-fcompiler.diff > patch-intel-fcompiler.diff
+sed -e "s|<CFLAGS>|$CFLAGS|g" ../patch-intel-ccompiler.diff > patch-intel-ccompiler.diff
+patch numpy/distutils/fcompiler/intel.py patch-intel-fcompiler.diff
+patch numpy/distutils/intelccompiler.py patch-intel-ccompiler.diff
+python setup.py build -j 4 --compiler=intelem --fcompiler=intelem install --user 2>&1 | tee loki-inst
+cd ..
+
+# scipy
+git clone git://github.com/scipy/scipy.git scipy-$scipy_version
+cd scipy-$scipy_version
+git checkout v$scipy_version
+python setup.py build -j 4 --compiler=intelem --fcompiler=intelem install --user 2>&1 | tee loki-inst
+cd ..
+
+# fix permissions
+chmod -R g+rwX $tgt
+chmod -R o+rX $tgt
+

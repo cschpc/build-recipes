@@ -1,37 +1,45 @@
-# fetch source code
-git clone https://github.com/python/cpython
-cd cpython
+# volatile version number(s)
+python_version=2.7.13
 
-# checkout correct version
-#  2.7.13 -- 9c1426de7521299f70eb5483e7e25d1c2a73dbbd
-git checkout 9c1426de7521299f70eb5483e7e25d1c2a73dbbd
+# fetch source code
+git clone https://github.com/python/cpython.git python-$python_version
+cd python-$python_version
+git checkout v$python_version
+
+# target directory for installation
+tgt=$USERAPPL/python-2017-10
 
 # setup build environment
-module swap PrgEnv-cray PrgEnv-intel
-
-export CRAYPE_LINK_TYPE=dynamic
-export CRAY_ADD_RPATH=yes
+module purge
+module load intel/16.0.0
+module load mkl/11.3.0
+module load intelmpi/5.1.1 
 
 export CXX=CC
 export CC=cc
-export FC=ftn
-export CFLAGS=-O2
-export CPPFLAGS=-O2
+export CFLAGS='-O2 -xAVX -axCORE-AVX2'
+export CPPFLAGS='-O2 -xAVX -axCORE-AVX2'
 
-export MPICC=cc
-export MPI_CPP=CC
+export F77=f77
+export FFLAGS='-O1 -xAVX -axCORE-AVX2'
+
+export LINKFORSHARED='-Wl,-export-dynamic -dynamic'
+export MPI_LINKFORSHARED='-Wl,-export-dynamic -dynamic'
+export LDFLAGS="-Wl,-rpath=$tgt/lib"
+
+export MPICC=mpicc
+export MPI_CPP=mpiCC
 export MPI_CFLAGS=$CFLAGS
 export MPI_CPPFLAGS=$CPPFLAGS
-
-# target directory for installation
-tgt=/work/knl-users/louhivuo/lib/cpython-2017-01
 
 # build and install
 ./configure --prefix=$tgt --disable-ipv6 --enable-unicode=ucs4 2>&1 | tee loki-conf
 make 2>&1 | tee loki-make
 make install 2>&1 | tee loki-inst
 
+# setup load script
+sed -e "s|<BASE>|$tgt|g" ../load.sh > $tgt/load.sh
+
 # fix permissions
 chmod -R g+rwX $tgt
 chmod -R o+rX $tgt
-
