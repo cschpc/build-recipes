@@ -1,11 +1,11 @@
 #!/usr/bin/env python
-"""gcc.py is a wrapper for the Cray compiler,
-  converting/removing incompatible gcc args.   """
+"""Wrapper for the GNU compiler that converts / removes incompatible
+   compiler options and allows for file-specific tailoring."""
 
 import sys
 from subprocess import call
-from glob import glob
 
+compiler = 'cc'
 args2change = {
         '-fno-strict-aliasing':'',
         '-Wall':'',
@@ -13,7 +13,7 @@ args2change = {
         '-DNDEBUG':'',
         '-UNDEBUG':''
         }
-fragile_files = []
+fragile_files = ['c/xc/tpss.c']
 
 optimise = None  # optimisation level 0/1/2/3
 debug = False    # use -g or not
@@ -54,6 +54,6 @@ if debug:
     flags.insert(0, '-g')
 
 # construct and execute the compile command
-cmd = 'cc {0} {1}'.format(' '.join(flags), ' '.join(args))
+cmd = '{0} {1} {2}'.format(compiler, ' '.join(flags), ' '.join(args))
 print(cmd)
 call(cmd, shell=True)
