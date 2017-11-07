@@ -1,0 +1,32 @@
+# volatile version number
+gpaw_version=1.3.0
+
+# get source code
+git clone https://gitlab.com/gpaw/gpaw.git gpaw-$gpaw_version
+cd gpaw-$gpaw_version
+git checkout $gpaw_version
+
+# load build environment
+module purge
+module load gcc/4.9.3
+module load mkl/11.3.0
+module load intelmpi/5.1.1
+source /appl/nano/gpaw/python/2.7.13/load.sh 2017-10
+module load hdf5-par/1.8.15
+module load gpaw-setups/0.9.11271
+module load libxc/3.0.0
+
+# set target directory
+tgt=/appl/nano/gpaw/$gpaw_version
+
+# patch the test suite
+patch gpaw/test/xc/xc.py patch-xc.diff
+patch gpaw/test/parallel/pblas.py patch-pblas.diff
+
+# install and fix dirs
+python setup.py install --customize=customize-taito.py --prefix=$tgt 2>&1 | tee loki-inst
+
+# fix permissions
+chmod -R g+rwX $tgt
+chmod -R o+rX $tgt
+
