@@ -1,0 +1,32 @@
+# volatile version number
+libxc_version=3.0.0
+
+# get source code
+#   OR alternatively download release tar-ball
+git clone https://gitlab.com/libxc/libxc.git libxc-$libxc_version
+cd libxc-$libxc_version
+git checkout $libxc_version
+autoconf
+
+# load build environment
+module purge
+module load gcc/4.9.3
+module load mkl/11.3.0
+module load intelmpi/5.1.1
+
+# compile
+export CC=mpicc
+export CFLAGS='-O3 -ffast-math -funroll-loops -march=sandybridge -mtune=haswell -fPIC'
+
+# set target directory
+tgt=/appl/nano/libxc/$libxc_version
+
+# build and install
+./configure --prefix=$tgt 2>&1 | tee loki-conf
+make 2>&1 | tee loki-make
+make install 2>&1 | tee loki-inst
+
+# fix permissions
+chmod -R g+rwX $tgt
+chmod -R o+rX $tgt
+
