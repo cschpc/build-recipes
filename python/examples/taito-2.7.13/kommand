@@ -1,0 +1,35 @@
+# volatile version number(s)
+python_version=2.7.13
+
+# fetch source code
+git clone https://github.com/python/cpython.git python-$python_version
+cd python-$python_version
+git checkout v$python_version
+
+# target directory for installation
+tgt=/appl/nano/gpaw/python/$python_version
+
+# setup build environment
+module purge
+module load gcc/4.9.3
+module load mkl/11.3.0
+module load intelmpi/5.1.1
+
+export CC=cc
+export CFLAGS='-march=sandybridge -mtune=haswell -O3'
+export CXX=CC
+export CXXFLAGS='-march=sandybridge -mtune=haswell -O3'
+export F77=f77
+export FFLAGS='-march=sandybridge -mtune=haswell -O3'
+
+# build and install
+./configure --prefix=$tgt --enable-shared --disable-ipv6 --enable-unicode=ucs4 2>&1 | tee loki-conf
+make 2>&1 | tee loki-make
+make install 2>&1 | tee loki-inst
+
+# setup load script
+sed -e "s|<BASE>|$tgt|g" ../load.sh > $tgt/load.sh
+
+# fix permissions
+chmod -R g+rwX $tgt
+chmod -R o+rX $tgt
