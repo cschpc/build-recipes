@@ -24,7 +24,7 @@ patch gpaw/test/test.py patch-testpy.diff
 patch gpaw/test/xc/xc.py patch-xc.diff
 
 # install and fix dirs
-python setup.py install --customize=customize-gnu.py --prefix=$tgt 2>&1 | tee loki-inst
+python setup.py install --customize=customize-sisu.py --prefix=$tgt 2>&1 | tee loki-inst
 
 # fix permissions
 chmod -R g+rwX $tgt

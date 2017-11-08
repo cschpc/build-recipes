@@ -1,55 +1,79 @@
 #!/usr/bin/env python
-"""gcc.py is a wrapper for the Cray compiler,
-  converting/removing incompatible gcc args.   """
+"""Wrapper for the GNU compiler that converts / removes incompatible
+   compiler options and allows for file-specific tailoring."""
 
 import sys
 from subprocess import call
-from glob import glob
 
-args2change = {"-fno-strict-aliasing":"",
-              "-fmessage-length=0":"",
-              "-fstack-protector":"",
-              "-funwind-tables":"",
-              "-fasynchronous-unwind-tables":"",
-              "-fwrapv":"",
-              "-Wall":"",
-              # "-std=c99":"",
-              # "-fPIC":"",
-              # "-g":"",
-              "-D_FORTIFY_SOURCE=2":"",
-              "-DNDEBUG":"",
-              "-UNDEBUG":"",
-              # "-pthread":"",
-              # "-shared":":",
-              # "-Xlinker":"",
-              # "-export-dynamic":"",
-              "-Wstrict-prototypes":"",
-              "-dynamic":"-dynamic",
-              "-O3":"",
-              "-O3":"",
-              "-O2":"",
-              "-O1":""}
-
+# Default compiler and options
+compiler = 'gcc'
+args2change = {}
 fragile_files = ['c/xc/tpss.c']
+# Default optimisation settings
+default_level = 3
+default_flags = ['-ffast-math -funroll-loops']
+fragile_level = 2
+fragile_flags = []
 
-cmd = ""
-fragile = False
-opt = 1
+# Sisu (Cray XC40)
+if True:
+    compiler = 'cc'
+    args2change = {
+            '-fno-strict-aliasing':'',
+            '-Wall':'',
+            '-Wstrict-prototypes':'',
+            '-DNDEBUG':'',
+            '-UNDEBUG':''
+            }
+    default_flags += ['-march=haswell -mtune=haswell -mavx2']
+
+# Taito (HP cluster)
+if not True:
+    compiler = 'mpicc'
+    default_flags += ['-march=sandybridge -mtune=haswell']
+
+optimise = None  # optimisation level 0/1/2/3
+debug = False    # use -g or not
+fragile = False  # use special flags for current file?
+sandwich = True  # use optimisation flag twice (= no override possible)
+
+# process arguments
+args = []
 for arg in sys.argv[1:]:
-   cmd += " "
-   t = arg.strip()
-   if t in fragile_files:
-       opt = 2
-   if t in args2change:
-       cmd += args2change[t]
-   else:
-       cmd += arg
+    arg = arg.strip()
+    if arg.startswith('-O'):
+        level = int(arg.replace('-O',''))
+        if not optimise or level > optimise:
+            optimise = level
+    elif arg == '-g':
+        debug = True
+    elif arg in args2change:
+        if args2change[arg]:
+            args.append(args2change[arg])
+    else:
+        if arg in fragile_files:
+            fragile = True
+        args.append(arg)
 
-flags_list = {1: "-O3 -funroll-loops -mavx",
-             2: "-O2",
-             }
+# set default optimisation level and flags
+if fragile:
+    optimise = min(fragile_level, optimise)
+    flags = fragile_flags
+else:
+    optimise = max(default_level, optimise)
+    flags = default_flags
 
-flags = flags_list[opt]
-cmd = "cc %s %s"%(flags, cmd)
+# add optimisation level to flags
+if optimise is not None:
+    flags.insert(0, '-O{0}'.format(optimise))
+    if sandwich:
+        args.append('-O{0}'.format(optimise))
+# make sure -g is always the _first_ flag, so it doesn't mess e.g. with the
+# optimisation level
+if debug:
+    flags.insert(0, '-g')
 
+# construct and execute the compile command
+cmd = '{0} {1} {2}'.format(compiler, ' '.join(flags), ' '.join(args))
+print(cmd)
 call(cmd, shell=True)
