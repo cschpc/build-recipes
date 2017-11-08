@@ -11,7 +11,7 @@ args2change = {}
 fragile_files = ['c/xc/tpss.c']
 # Default optimisation settings
 default_level = 3
-default_flags = ['-ffast-math -funroll-loops']
+default_flags = ['-funroll-loops']
 fragile_level = 2
 fragile_flags = []
 
@@ -23,7 +23,7 @@ if True:
 # Taito (HP cluster)
 if not True:
     compiler = 'mpicc'
-    default_flags += ['-march=sandybridge -mtune=haswell']
+    default_flags += ['-ffast-math -march=sandybridge -mtune=haswell']
 
 optimise = None  # optimisation level 0/1/2/3
 debug = False    # use -g or not
