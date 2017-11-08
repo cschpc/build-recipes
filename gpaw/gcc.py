@@ -19,6 +19,7 @@ fragile_flags = []
 if True:
     compiler = 'cc'
     default_flags += ['-march=haswell -mtune=haswell -mavx2']
+    fragile_files += ['c/xc/revtpss.c']
 
 # Taito (HP cluster)
 if not True:
