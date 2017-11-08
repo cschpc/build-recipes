@@ -20,7 +20,7 @@ export CRAY_ADD_RPATH=yes
 tgt=/appl/nano/gpaw/$gpaw_version
 
 # patch the test suite
-patch gpaw/test/test.py patch-testpy.diff
+patch gpaw/test/test.py patch-test.diff
 patch gpaw/test/xc/xc.py patch-xc.diff
 
 # install and fix dirs
