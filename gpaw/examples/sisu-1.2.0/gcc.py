@@ -18,13 +18,6 @@ fragile_flags = []
 # Sisu (Cray XC40)
 if True:
     compiler = 'cc'
-    args2change = {
-            '-fno-strict-aliasing':'',
-            '-Wall':'',
-            '-Wstrict-prototypes':'',
-            '-DNDEBUG':'',
-            '-UNDEBUG':''
-            }
     default_flags += ['-march=haswell -mtune=haswell -mavx2']
 
 # Taito (HP cluster)
