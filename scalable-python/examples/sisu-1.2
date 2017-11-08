@@ -1,0 +1,48 @@
+# fetch source code
+git clone https://github.com/CSCfi/scalable-python.git
+cd scalable-python
+
+# setup build environment
+module swap PrgEnv-cray PrgEnv-gnu
+
+export CRAYPE_LINK_TYPE=dynamic
+export CRAY_ADD_RPATH=yes
+
+export CXX=CC
+export CC=cc
+export FC=ftn
+export CFLAGS=-O2
+export CPPFLAGS=-O2
+
+export LINKFORSHARED='-Wl,-export-dynamic -dynamic'
+export MPI_LINKFORSHARED='-Wl,-export-dynamic -dynamic'
+
+export MPICC=cc
+export MPI_CPP=CC
+export MPI_CFLAGS=$CFLAGS
+export MPI_CPPFLAGS=$CPPFLAGS
+
+# target directory for installation
+tgt=/appl/opt/python/scalable-python-2017-10
+
+# build non-MPI python for front-end nodes
+module swap craype-haswell craype-sandybridge
+
+./configure --prefix=$tgt --enable-mpi --disable-ipv6 --enable-unicode=ucs4 --with-ensurepip=install 2>&1 | tee loki-conf
+
+make 2>&1 | tee loki-make
+make install 2>&1 | tee loki-inst
+
+# build MPI python for compute nodes
+module swap craype-sandybridge craype-haswell 
+
+make mpi 2>&1 | tee loki-make-mpi
+make install-mpi 2>&1 | tee loki-inst-mpi
+
+# setup load script
+sed -e "s|<BASE>|$tgt|g" load.sh > $tgt/load.sh
+
+# fix permissions
+chmod -R g+rwX $tgt
+chmod -R o+rX $tgt
+
