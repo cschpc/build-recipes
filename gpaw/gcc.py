@@ -5,19 +5,30 @@
 import sys
 from subprocess import call
 
-compiler = 'cc'
-args2change = {
-        '-fno-strict-aliasing':'',
-        '-Wall':'',
-        '-Wstrict-prototypes':'',
-        '-DNDEBUG':'',
-        '-UNDEBUG':''
-        }
+# Default compiler and options
+compiler = 'gcc'
+args2change = {}
 fragile_files = ['c/xc/tpss.c']
+# Default optimisation settings
+default_level = 3
+default_flags = ['-ffast-math -funroll-loops']
+fragile_level = 2
+fragile_flags = []
+
+# Sisu (Cray XC40)
+if True:
+    compiler = 'cc'
+    default_flags += ['-march=haswell -mtune=haswell -mavx2']
+
+# Taito (HP cluster)
+if not True:
+    compiler = 'mpicc'
+    default_flags += ['-march=sandybridge -mtune=haswell']
 
 optimise = None  # optimisation level 0/1/2/3
 debug = False    # use -g or not
 fragile = False  # use special flags for current file?
+sandwich = True  # use optimisation flag twice (= no override possible)
 
 # process arguments
 args = []
@@ -39,15 +50,17 @@ for arg in sys.argv[1:]:
 
 # set default optimisation level and flags
 if fragile:
-    optimise = min(2, optimise)
-    flags = []
+    optimise = min(fragile_level, optimise)
+    flags = fragile_flags
 else:
-    optimise = max(3, optimise)
-    flags = ['-funroll-loops', '-mavx2']
+    optimise = max(default_level, optimise)
+    flags = default_flags
 
 # add optimisation level to flags
 if optimise is not None:
     flags.insert(0, '-O{0}'.format(optimise))
+    if sandwich:
+        args.append('-O{0}'.format(optimise))
 # make sure -g is always the _first_ flag, so it doesn't mess e.g. with the
 # optimisation level
 if debug:
