@@ -5,7 +5,7 @@ import os
 compiler = './gcc.py'
 mpicompiler = './gcc.py'
 mpilinker = 'cc'
-extra_compile_args = ['-std=c99']
+extra_compile_args = ['-std=c99 -fopenmp-simd']
 
 # libz
 libraries = ['z']
