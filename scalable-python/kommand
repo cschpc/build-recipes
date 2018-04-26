@@ -8,22 +8,24 @@ module swap PrgEnv-cray PrgEnv-gnu
 export CRAYPE_LINK_TYPE=dynamic
 export CRAY_ADD_RPATH=yes
 
-export CXX=CC
 export CC=cc
 export FC=ftn
+export CXX=CC
 export CFLAGS=-O2
-export CPPFLAGS=-O2
 
 export LINKFORSHARED='-Wl,-export-dynamic -dynamic'
 export MPI_LINKFORSHARED='-Wl,-export-dynamic -dynamic'
 
 export MPICC=cc
-export MPI_CPP=CC
 export MPI_CFLAGS=$CFLAGS
-export MPI_CPPFLAGS=$CPPFLAGS
+
+# use newer SSL (to fix pip on Sisu)
+export CFLAGS="$CFLAGS -I/appl/opt/libressl/2.6.4/include"
+export LDFLAGS='-L/appl/opt/libressl/2.6.4/lib'
+export LD_LIBRARY_PATH=/appl/opt/libressl/2.6.4/lib:$LD_LIBRARY_PATH
 
 # target directory for installation
-tgt=/appl/opt/python/scalable-python-2017-10
+tgt=/appl/opt/python/scalable-python-2018-04
 
 # build non-MPI python for front-end nodes
 module swap craype-haswell craype-sandybridge
@@ -38,6 +40,10 @@ module swap craype-sandybridge craype-haswell
 
 make mpi 2>&1 | tee loki-make-mpi
 make install-mpi 2>&1 | tee loki-inst-mpi
+
+# unload SSL fix (to prepare for installation of extra modules)
+unset LDFLAGS
+export CFLAGS=-O2
 
 # setup load script
 sed -e "s|<BASE>|$tgt|g" load.sh > $tgt/load.sh
