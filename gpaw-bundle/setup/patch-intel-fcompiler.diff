@@ -1,4 +1,0 @@
-117c117
-<         return ['-xhost -openmp -fp-model strict']
----
->         return ['<FFLAGS>']
