@@ -12,12 +12,7 @@ source $tgt/load.sh
 export CFLAGS="-fPIC $CFLAGS -fopenmp"
 export FFLAGS="-fPIC $FFLAGS -fopenmp"
 
-# install generic modules (only once!)
-python -m ensurepip
-pip install --upgrade pip
-pip install nose
-
-# isolate other modules using PYTHONUSERBASE
+# isolate modules using PYTHONUSERBASE
 export PYTHONUSERBASE=$tgt/bundle/2017-10
 mkdir -p $PYTHONUSERBASE/lib/python2.7/site-packages
 
