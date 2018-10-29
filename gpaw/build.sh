@@ -20,11 +20,13 @@ export CRAY_ADD_RPATH=yes
 tgt=/appl/nano/gpaw/$gpaw_version
 
 # patch the test suite
-patch gpaw/test/test.py patch-test.diff
-patch gpaw/test/xc/xc.py patch-xc.diff
+patch gpaw/test/test.py ../setup/patch-test.diff
+patch gpaw/test/xc/xc.py ../setup/patch-xc.diff
 
 # install and fix dirs
-python setup.py install --customize=customize-sisu.py --prefix=$tgt 2>&1 | tee loki-inst
+ln -s ../setup/gcc.py
+python setup.py install --customize=../setup/customize-sisu.py --prefix=$tgt 2>&1 | tee loki-inst
+cd ..
 
 # fix permissions
 chmod -R g+rwX $tgt
