@@ -48,6 +48,11 @@ export CFLAGS=-O2
 # setup load script
 sed -e "s|<BASE>|$tgt|g" load.sh > $tgt/load.sh
 
+# install pip
+source $tgt/load.sh
+python -m ensurepip
+pip install --upgrade pip
+
 # fix permissions
 chmod -R g+rwX $tgt
 chmod -R o+rX $tgt

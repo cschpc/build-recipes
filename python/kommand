@@ -39,6 +39,7 @@ make install 2>&1 | tee loki-inst
 sed -e "s|<BASE>|$tgt|g" load.sh > $tgt/load.sh
 
 # install pip
+source $tgt/load.sh
 python -m ensurepip
 pip install --upgrade pip
 
