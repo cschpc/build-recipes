@@ -1,19 +1,35 @@
-### Continue directly after ../scalable-python/kommand
-###   i.e. $tgt points to the install dir of Scalable Python
+### Python (extra) modules installation script for Sisu (/Taito)
+###   uses PYTHONUSERBASE to bundle all modules into a separate location
+###   away from the base python installation
 
-# volatile version numbers
+# command to load Python
+py_load="source $PYTHONHOME/load.sh"
+# or if a module exists
+# py_load="module load scalable-python/1.2"
+
+# installation directory (modify!)
+tgt=$PYTHONHOME/bundle/2017-10
+
+# version numbers (modify if needed)
 numpy_version=1.13.3
 scipy_version=0.19.1
 ase_version=3.15.0
 libsci_version=16.11.1
 
-# load Scalable Python
-source $tgt/load.sh
-export CFLAGS="-fPIC $CFLAGS -fopenmp"
-export FFLAGS="-fPIC $FFLAGS -fopenmp"
+# setup build environment
+eval $py_load
+export CC=cc
+export FC=ftn
+export CXX=CC
+export CFLAGS="-fPIC -O2 -fopenmp"
+export FFLAGS="-fPIC -O2 -fopenmp"
+export LINKFORSHARED='-Wl,-export-dynamic -dynamic'
+export MPI_LINKFORSHARED='-Wl,-export-dynamic -dynamic'
+export CRAYPE_LINK_TYPE=dynamic
+export CRAY_ADD_RPATH=yes
 
-# isolate modules using PYTHONUSERBASE
-export PYTHONUSERBASE=$tgt/bundle/2017-10
+# use --user to install modules
+export PYTHONUSERBASE=$tgt
 mkdir -p $PYTHONUSERBASE/lib/python2.7/site-packages
 
 # cython + mpi4py
@@ -24,9 +40,10 @@ pip install --user mpi4py
 git clone git://github.com/numpy/numpy.git numpy-$numpy_version
 cd numpy-$numpy_version
 git checkout v$numpy_version
-sed -e "s|<MKLROOT>|$MKLROOT|g" ../setup/site.cfg-taito-template > site.cfg
-# or w/ libsci:
-#  sed -e 's/<ARCH>/haswell/g' -e "s/<LIBSCI>/$libsci_version/g" ../setup/site.cfg-sisu-template >| site.cfg
+# with MKL (for Taito):
+#   sed -e "s|<MKLROOT>|$MKLROOT|g" ../setup/site.cfg-taito-template >| site.cfg
+# or w/ libsci (for Sisu):
+sed -e 's/<ARCH>/haswell/g' -e "s/<LIBSCI>/$libsci_version/g" ../setup/site.cfg-sisu-template >| site.cfg
 python setup.py build -j 4 install --user 2>&1 | tee loki-inst
 cd ..
 
