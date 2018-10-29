@@ -24,9 +24,9 @@ pip install --user mpi4py
 git clone git://github.com/numpy/numpy.git numpy-$numpy_version
 cd numpy-$numpy_version
 git checkout v$numpy_version
-sed -e "s|<MKLROOT>|$MKLROOT|g" ../site.cfg-taito-template > site.cfg
+sed -e "s|<MKLROOT>|$MKLROOT|g" ../setup/site.cfg-taito-template > site.cfg
 # or w/ libsci:
-#  sed -e 's/<ARCH>/haswell/g' -e "s/<LIBSCI>/$libsci_version/g" ../site.cfg-sisu-template >| site.cfg
+#  sed -e 's/<ARCH>/haswell/g' -e "s/<LIBSCI>/$libsci_version/g" ../setup/site.cfg-sisu-template >| site.cfg
 python setup.py build -j 4 install --user 2>&1 | tee loki-inst
 cd ..
 
