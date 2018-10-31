@@ -2,7 +2,7 @@
 ###   uses --prefix to set a custom installation directory
 
 # version numbers (modify if needed)
-gpaw_version=1.3.0
+gpaw_version=1.4.0
 
 # installation directory (modify!)
 tgt=/appl/nano/gpaw/$gpaw_version
@@ -11,6 +11,7 @@ tgt=/appl/nano/gpaw/$gpaw_version
 module load scalable-python/1.2
 module load cray-hdf5-parallel
 module load libxc/3.0.0
+module load git
 export CRAYPE_LINK_TYPE=dynamic
 export CRAY_ADD_RPATH=yes
 
