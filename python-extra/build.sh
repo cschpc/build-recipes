@@ -2,22 +2,21 @@
 ###   uses PYTHONUSERBASE to bundle all modules into a separate location
 ###   away from the base python installation
 
-# command to load Python
-py_load="source $PYTHONHOME/load.sh"
-# or if a module exists
-# py_load="module load scalable-python/1.2"
+# load Python
+module load scalable-python/1.2
+# or if no module exists:
+#   source $PYTHONHOME/load.sh
 
 # installation directory (modify!)
-tgt=$PYTHONHOME/bundle/2017-10
+tgt=$PYTHONHOME/bundle/2018-03
 
 # version numbers (modify if needed)
-numpy_version=1.13.3
-scipy_version=0.19.1
-ase_version=3.15.0
+numpy_version=1.14.2
+scipy_version=1.0.1
+ase_version=3.16.0
 libsci_version=16.11.1
 
 # setup build environment
-eval $py_load
 export CC=cc
 export FC=ftn
 export CXX=CC
@@ -58,6 +57,7 @@ cd ..
 git clone https://gitlab.com/ase/ase.git ase-$ase_version
 cd ase-$ase_version
 git checkout $ase_version
+patch setup.py ../setup/patch-ase.diff
 python setup.py install --user 2>&1 | tee loki-inst
 cd ..
 
