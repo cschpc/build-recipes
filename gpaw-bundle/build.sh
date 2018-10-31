@@ -6,16 +6,17 @@
 tgt=$USERAPPL/gpaw-bundle-2018-04
 
 # version numbers (modify if needed)
-numpy_version=1.13.3
-scipy_version=0.19.1
-ase_version=3.15.0
-gpaw_version=1.3.0
+numpy_version=1.14.2
+scipy_version=1.0.1
+ase_version=3.16.0
+gpaw_version=1.4.0
 libsci_version=16.11.1
 
 # setup build environment
 module load scalable-python/1.2
 module load cray-hdf5-parallel
 module load libxc/3.0.0
+module load git
 export CC=cc
 export FC=ftn
 export CXX=CC
@@ -56,6 +57,7 @@ cd ..
 git clone https://gitlab.com/ase/ase.git ase-$ase_version
 cd ase-$ase_version
 git checkout $ase_version
+patch setup.py ../setup/patch-ase.diff
 python setup.py install --user 2>&1 | tee loki-inst
 cd ..
 
