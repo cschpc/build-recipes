@@ -1,0 +1,13 @@
+diff --git a/gpaw/test/test.py b/gpaw/test/test.py
+index 0413d0c..384d6f0 100644
+--- a/gpaw/test/test.py
++++ b/gpaw/test/test.py
+@@ -101,6 +101,8 @@ def main(args):
+ 
+     from gpaw.test import TestRunner
+ 
++    wrapoff()
++
+     if mpi.world.size > 8:
+         if mpi.rank == 0:
+             message = (
