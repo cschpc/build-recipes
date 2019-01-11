@@ -15,6 +15,10 @@ library_dirs += [os.environ['OPENBLAS_ROOT'] + '/lib']
 include_dirs += [os.environ['OPENBLAS_ROOT'] + '/include']
 libraries += ['openblas']
 
+# scalapack
+library_dirs += [os.environ['SCALAPACK_ROOT'] + '/lib']
+libraries += ['scalapack']
+
 # libxc
 library_dirs += [os.environ['LIBXCDIR'] + '/lib']
 include_dirs += [os.environ['LIBXCDIR'] + '/include']
@@ -28,7 +32,7 @@ define_macros += [("GPAW_MPI2",1)]
 define_macros += [('GPAW_CUDA', '1')]
 
 # ScaLAPACK
-scalapack = False
+scalapack = True
 
 # HDF5
 hdf5 = False
