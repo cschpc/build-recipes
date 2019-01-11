@@ -1,0 +1,3 @@
+#!/bin/bash
+export OPENBLAS_ROOT=<BASE>
+export LD_LIBRARY_PATH=$OPENBLAS_ROOT/lib:$LD_LIBRARY_PATH
