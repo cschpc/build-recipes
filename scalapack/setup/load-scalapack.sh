@@ -1,0 +1,3 @@
+#!/bin/bash
+export SCALAPACK_ROOT=<BASE>
+export LD_LIBRARY_PATH=$SCALAPACK_ROOT/lib:$LD_LIBRARY_PATH
