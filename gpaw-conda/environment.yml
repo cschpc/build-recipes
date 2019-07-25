@@ -1,0 +1,9 @@
+name: gpaw-1.5.2
+dependencies:
+  - python
+  - pip
+  - numpy=1.16.3
+  - scipy=1.2.1
+  - cython
+  - pip:
+    - ase==3.17.0
