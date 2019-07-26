@@ -3,9 +3,9 @@
 ###   away from the base python installation
 
 # load Python
-module load scalable-python/1.2
+#module load scalable-python/1.2
 # or if no module exists:
-#   source $PYTHONHOME/load.sh
+source $PYTHONHOME/load.sh
 
 # installation directory (modify!)
 tgt=$PYTHONHOME/bundle/2018-03
@@ -14,18 +14,10 @@ tgt=$PYTHONHOME/bundle/2018-03
 numpy_version=1.14.2
 scipy_version=1.0.1
 ase_version=3.16.0
-libsci_version=16.11.1
 
 # setup build environment
-export CC=cc
-export FC=ftn
-export CXX=CC
-export CFLAGS="-fPIC -O2 -fopenmp"
-export FFLAGS="-fPIC -O2 -fopenmp"
-export LINKFORSHARED='-Wl,-export-dynamic -dynamic'
-export MPI_LINKFORSHARED='-Wl,-export-dynamic -dynamic'
-export CRAYPE_LINK_TYPE=dynamic
-export CRAY_ADD_RPATH=yes
+export CFLAGS='-fPIC -march=cascadelake -O3 -fopenmp'
+export FFLAGS='-fPIC -march=cascadelake -O3 -fopenmp'
 
 # use --user to install modules
 export PYTHONUSERBASE=$tgt
@@ -39,10 +31,10 @@ pip install --user mpi4py
 git clone git://github.com/numpy/numpy.git numpy-$numpy_version
 cd numpy-$numpy_version
 git checkout v$numpy_version
-# with MKL (for Taito):
-#   sed -e "s|<MKLROOT>|$MKLROOT|g" ../setup/site.cfg-taito-template >| site.cfg
+# with MKL (for Puhti):
+sed -e "s|<MKLROOT>|$MKLROOT|g" ../setup/site.cfg-puhti-template >| site.cfg
 # or w/ libsci (for Sisu):
-sed -e 's/<ARCH>/haswell/g' -e "s/<LIBSCI>/$libsci_version/g" ../setup/site.cfg-sisu-template >| site.cfg
+#sed -e 's/<ARCH>/haswell/g' -e "s/<LIBSCI>/$libsci_version/g" ../setup/site.cfg-sisu-template >| site.cfg
 python setup.py build -j 4 install --user 2>&1 | tee loki-inst
 cd ..
 

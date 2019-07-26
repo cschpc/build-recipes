@@ -1,3 +1,6 @@
+# target directory for installation
+tgt=/appl/soft/phys/gpaw/python/2.7.13
+
 # fetch source code
 git clone https://github.com/python/cpython
 cd cpython
@@ -7,33 +10,19 @@ cd cpython
 git checkout 9c1426de7521299f70eb5483e7e25d1c2a73dbbd
 
 # setup build environment
-module swap PrgEnv-cray PrgEnv-gnu
-module swap craype-haswell craype-sandybridge
+module load gcc/9.1.0
+module load hpcx-mpi/2.4.0
+module load hdf5/1.10.4
+module load intel-mkl/2019.0.4
 
-export CRAYPE_LINK_TYPE=dynamic
-export CRAY_ADD_RPATH=yes
-
-export CXX=CC
-export CC=cc
-export FC=ftn
-export CFLAGS=-O2
-export CPPFLAGS=-O2
-
-export LINKFORSHARED='-Wl,-export-dynamic -dynamic'
-export MPI_LINKFORSHARED='-Wl,-export-dynamic -dynamic'
-
-export MPICC=cc
-export MPI_CPP=CC
-export MPI_CFLAGS=$CFLAGS
-export MPI_CPPFLAGS=$CPPFLAGS
-
-# target directory for installation
-tgt=/appl/opt/python/cpython-2017-01
+export CFLAGS='-march=cascadelake -O3'
+export FFLAGS='-march=cascadelake -O3'
 
 # build and install
-./configure --prefix=$tgt --disable-ipv6 --enable-unicode=ucs4 2>&1 | tee loki-conf
+./configure --prefix=$tgt --enable-shared --disable-ipv6 --enable-unicode=ucs4 2>&1 | tee loki-conf
 make 2>&1 | tee loki-make
 make install 2>&1 | tee loki-inst
+cd ..
 
 # setup load script
 sed -e "s|<BASE>|$tgt|g" load.sh > $tgt/load.sh
