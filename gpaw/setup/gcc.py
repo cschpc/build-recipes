@@ -15,8 +15,13 @@ default_flags = ['-funroll-loops']
 fragile_level = 2
 fragile_flags = []
 
-# Sisu (Cray XC40)
+# Puhti (Bull cluster)
 if True:
+    compiler = 'mpicc'
+    default_flags += ['-march=cascadelake']
+
+# Sisu (Cray XC40)
+if not True:
     compiler = 'cc'
     default_flags += ['-march=haswell -mtune=haswell -mavx2']
     fragile_files += ['c/xc/revtpss.c']
@@ -26,7 +31,7 @@ if not True:
     compiler = 'mpicc'
     default_flags += ['-ffast-math -march=sandybridge -mtune=haswell']
 
-optimise = None  # optimisation level 0/1/2/3
+optimise = None  # optimisation level 0/1/2/3 (None == default)
 debug = False    # use -g or not
 fragile = False  # use special flags for current file?
 sandwich = True  # use optimisation flag twice (= no override possible)
