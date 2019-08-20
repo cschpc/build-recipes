@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 """Wrapper for the GNU compiler that converts / removes incompatible
    compiler options and allows for file-specific tailoring."""
 

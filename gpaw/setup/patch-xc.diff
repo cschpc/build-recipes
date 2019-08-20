@@ -17,7 +17,7 @@ index 62be449..e437b45 100644
 -    equal(error, 0, 6e-9)
 +    try:
 +        equal(error, 0, 6e-9)
-+    except AssertionError, e:
++    except AssertionError as e:
 +        if func not in failed:
 +            failed.append(func)
 +        print('AssertionError ({0}): {1}'.format(func, e))
@@ -31,11 +31,11 @@ index 62be449..e437b45 100644
 -    equal(abs(d0_xg - d_xg).max(), 0, 2e-8)
 +    try:
 +        equal(abs(d0_xg - d_xg).max(), 0, 2e-8)
-+    except AssertionError, e:
++    except AssertionError as e:
 +        if func not in failed:
 +            failed.append(func)
 +        print('AssertionError ({0}): {1}'.format(func, e))
      del xc
 +
 +if failed:
-+    raise AssertionError, 'Failed functionals: ' + ' '.join(failed)
++    raise AssertionError('Failed functionals: ' + ' '.join(failed))
