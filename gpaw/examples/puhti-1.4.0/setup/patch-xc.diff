@@ -1,0 +1,41 @@
+diff --git a/gpaw/test/xc/xc.py b/gpaw/test/xc/xc.py
+index 62be449..e437b45 100644
+--- a/gpaw/test/xc/xc.py
++++ b/gpaw/test/xc/xc.py
+@@ -50,6 +50,7 @@ def f2(n_xg, xc):
+     xc.calculate(e_g, n_sg, dedn_sg, sigma_xg, dedsigma_xg, tau_sg, dedtau_sg)
+     return e_g, np.concatenate((dedn_sg, dedsigma_xg, dedtau_sg))
+ 
++failed = []
+ eps = 1.0e-6
+ 
+ n_xg = np.array(
+@@ -80,7 +81,12 @@ for i, func in enumerate(funcs):
+              abs(ds_xg[:2] - d0_xg[0]).max() +
+              abs(ds_xg[2:5].sum(0) / 4 - d0_xg[1]).max() +
+              abs(ds_xg[5:] - d0_xg[2]).max())
+-    equal(error, 0, 6e-9)
++    try:
++        equal(error, 0, 6e-9)
++    except AssertionError, e:
++        if func not in failed:
++            failed.append(func)
++        print('AssertionError ({0}): {1}'.format(func, e))
+     del xc
+ 
+ # Numbers from old lxc_xc.py test:
+@@ -116,5 +122,13 @@ for i, func in enumerate(funcs):
+         d_xg[x] = 0.5 * f2(m_xg, xc)[0] / eps
+         m_xg[x] -= 2 * eps
+         d_xg[x] -= 0.5 * f2(m_xg, xc)[0] / eps
+-    equal(abs(d0_xg - d_xg).max(), 0, 2e-8)
++    try:
++        equal(abs(d0_xg - d_xg).max(), 0, 2e-8)
++    except AssertionError, e:
++        if func not in failed:
++            failed.append(func)
++        print('AssertionError ({0}): {1}'.format(func, e))
+     del xc
++
++if failed:
++    raise AssertionError, 'Failed functionals: ' + ' '.join(failed)
