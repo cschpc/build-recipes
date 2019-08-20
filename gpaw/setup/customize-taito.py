@@ -1,13 +1,13 @@
-# User provided customizations for the gpaw setup
+# Custom GPAW setup for Taito (HP cluster)
 import os
 
-# compiler
+# compiler and linker
 compiler = './gcc.py'
 mpicompiler = './gcc.py'
 mpilinker = 'mpicc'
 extra_compile_args = ['-std=c99', '-O3', '-fopenmp-simd']
 
-# libz
+# libraries
 libraries = ['z']
 
 # libxc
@@ -19,7 +19,7 @@ libraries += ['xc']
 libraries += ['mkl_intel_lp64' ,'mkl_sequential' ,'mkl_core']
 mpi_libraries += ['mkl_scalapack_lp64', 'mkl_blacs_intelmpi_lp64']
 
-# use ScaLAPACK and HDF5
+# ScaLAPACK and HDF5
 scalapack = True
 hdf5 = True
 libraries += ['hdf5']

@@ -1,4 +1,4 @@
-### Python (extra) modules installation script for Sisu (/Taito)
+### Python (extra) modules installation script for Puhti (/Sisu)
 ###   uses PYTHONUSERBASE to bundle all modules into a separate location
 ###   away from the base python installation
 

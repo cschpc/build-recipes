@@ -15,7 +15,7 @@ default_flags = ['-funroll-loops']
 fragile_level = 2
 fragile_flags = []
 
-# Puhti (Bull cluster)
+# Puhti (Bull Sequana X1000)
 if True:
     compiler = 'mpicc'
     default_flags += ['-march=cascadelake']

@@ -1,4 +1,4 @@
-### GPAW installation script for Sisu (/Taito)
+### GPAW installation script for Puhti
 ###   uses --prefix to set a custom installation directory
 
 # version numbers (modify if needed)

@@ -1,13 +1,13 @@
-#User provided customizations for the gpaw setup
+# Custom GPAW setup for Sisu (Cray XC40)
 import os
 
-# compiler
+# compiler and linker
 compiler = './gcc.py'
 mpicompiler = './gcc.py'
 mpilinker = 'cc'
-extra_compile_args = ['-std=c99 -fopenmp-simd']
+extra_compile_args = ['-std=c99', '-O3', '-fopenmp-simd']
 
-# libz
+# libraries
 libraries = ['z']
 
 # libxc
@@ -15,7 +15,7 @@ library_dirs += [os.environ['LIBXCDIR'] + '/lib']
 include_dirs += [os.environ['LIBXCDIR'] + '/include']
 libraries += ['xc']
 
-# use ScaLAPACK and HDF5
+# ScaLAPACK and HDF5
 scalapack = True
 hdf5 = True
 

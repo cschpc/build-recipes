@@ -1,16 +1,13 @@
-# Custom GPAW setup for Sisu (Cray XC40)
+# Custom GPAW setup for Puhti (Bull Sequana X1000)
 import os
 
-# compiler
+# compiler and linker
 compiler = './gcc.py'
 mpicompiler = './gcc.py'
 mpilinker = 'mpicc'
 extra_compile_args = ['-std=c99', '-O3', '-fopenmp-simd']
-#extra_link_args = ['-fno-lto']
 
-#library_dirs += ['/appl/soft/phys/gpaw/python-2.7.13/lib']
-
-# libz
+# libraries
 libraries = ['z']
 
 # libxc
@@ -22,7 +19,7 @@ libraries += ['xc']
 libraries += ['mkl_intel_lp64' ,'mkl_sequential' ,'mkl_core']
 mpi_libraries += ['mkl_scalapack_lp64', 'mkl_blacs_intelmpi_lp64']
 
-# use ScaLAPACK and HDF5
+# ScaLAPACK and HDF5
 scalapack = True
 hdf5 = True
 

@@ -1,13 +1,13 @@
-# Custom GPAW setup for Sisu (Cray XC40)
+# Custom GPAW setup for Puhti (Bull Sequana X1000)
 import os
 
-# compiler
+# compiler and linker
 compiler = './gcc.py'
 mpicompiler = './gcc.py'
 mpilinker = 'mpicc'
 extra_compile_args = ['-std=c99', '-O3', '-fopenmp-simd']
 
-# libz
+# libraries
 libraries = ['z']
 
 # libxc
