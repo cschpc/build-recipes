@@ -54,6 +54,14 @@ patch setup.py ../setup/patch-ase.diff
 python3 setup.py install --user 2>&1 | tee loki-inst
 cd ..
 
+# set default bundle
+if [ ! -e "$(dirname $tgt)/default" ]
+then
+    cd $(dirname $tgt)
+    ln -s $(basename $tgt) default
+    cd -
+fi
+
 # fix permissions
 chmod -R g=u $tgt
 chmod -R o+rX $tgt
