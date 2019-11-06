@@ -19,7 +19,7 @@ libraries += ['xc']
 libraries += ['mkl_intel_lp64' ,'mkl_sequential' ,'mkl_core']
 mpi_libraries += ['mkl_scalapack_lp64', 'mkl_blacs_intelmpi_lp64']
 
-# use ScaLAPACK and HDF5
+# ScaLAPACK and HDF5
 scalapack = True
 hdf5 = True
 

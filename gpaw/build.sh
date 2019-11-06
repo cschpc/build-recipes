@@ -11,7 +11,6 @@ tgt=/appl/soft/phys/gpaw/$gpaw_version
 # setup build environment
 module load gcc/9.1.0
 module load mpich/3.3.1
-module load hdf5/1.10.4
 module load intel-mkl/2019.0.4
 source /appl/soft/phys/gpaw/python/3.7.3/load.sh 2019-05
 export CFLAGS='-fPIC -march=cascadelake -O3 -fopenmp'
