@@ -1,4 +1,4 @@
-### Python (extra) modules installation script for Sisu (/Taito)
+### Python (extra) modules installation script for Puhti (/Sisu)
 ###   uses PYTHONUSERBASE to bundle all modules into a separate location
 ###   away from the base python installation
 
@@ -32,9 +32,9 @@ git clone git://github.com/numpy/numpy.git numpy-$numpy_version
 cd numpy-$numpy_version
 git checkout v$numpy_version
 # with MKL (for Puhti):
-sed -e "s|<MKLROOT>|$MKLROOT|g" ../setup/site.cfg-puhti-template >| site.cfg
+sed -e "s|<MKLROOT>|$MKLROOT|g" ../setup/puhti.cfg >| site.cfg
 # or w/ libsci (for Sisu):
-#sed -e 's/<ARCH>/haswell/g' -e "s/<LIBSCI>/$libsci_version/g" ../setup/site.cfg-sisu-template >| site.cfg
+#sed -e 's/<ARCH>/haswell/g' -e "s/<LIBSCI>/$libsci_version/g" ../setup/sisu.cfg >| site.cfg
 python setup.py build -j 4 install --user 2>&1 | tee loki-inst
 cd ..
 
@@ -54,6 +54,6 @@ python setup.py install --user 2>&1 | tee loki-inst
 cd ..
 
 # fix permissions
-chmod -R g+rwX $tgt
+chmod -R g=u $tgt
 chmod -R o+rX $tgt
 
