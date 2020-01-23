@@ -21,7 +21,7 @@ mpi_libraries += ['mkl_scalapack_lp64', 'mkl_blacs_intelmpi_lp64']
 
 # ScaLAPACK and HDF5
 scalapack = True
-hdf5 = True
+hdf5 = False
 
 # GPAW defines
 define_macros += [('GPAW_NO_UNDERSCORE_CBLACS', '1')]
