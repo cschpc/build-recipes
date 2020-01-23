@@ -8,12 +8,12 @@
 source $PYTHONHOME/load.sh
 
 # installation directory (modify!)
-tgt=$PYTHONHOME/bundle/2018-03
+tgt=$PYTHONHOME/bundle/2016-06
 
 # version numbers (modify if needed)
-numpy_version=1.14.2
-scipy_version=1.0.1
-ase_version=3.16.0
+numpy_version=1.10.4
+scipy_version=0.17.1
+ase_version=3.11.0
 pycuda_version=2017.1.1
 
 # setup build environment
