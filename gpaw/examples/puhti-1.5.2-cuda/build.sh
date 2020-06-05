@@ -3,6 +3,7 @@
 
 # version numbers (modify if needed)
 gpaw_version=cuda
+gpaw_commit=111567ee39dd48e106b36b1aab4e6bc1b9961cae
 libxc_version=4.3.4
 
 # installation directory (modify!)
@@ -21,7 +22,7 @@ export LIBXCDIR=/appl/soft/phys/libxc/$libxc_version
 # gpaw
 git clone https://gitlab.com/mlouhivu/gpaw.git gpaw-$gpaw_version
 cd gpaw-$gpaw_version
-git checkout $gpaw_version
+git checkout $gpaw_commit
 cp ../setup/customize-cuda.py .
 ln -s ../setup/gcc.py
 cd c/cuda

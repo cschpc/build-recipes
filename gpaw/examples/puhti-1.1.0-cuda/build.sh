@@ -3,6 +3,7 @@
 
 # version numbers (modify if needed)
 gpaw_version=cuda
+gpaw_commit=ec9848385d7b6eb994b602a57bb979fb2dc9ecd4
 libxc_version=3.0.0
 
 # installation directory (modify!)
@@ -21,7 +22,7 @@ export LIBXCDIR=/appl/soft/phys/libxc/$libxc_version
 # gpaw
 git clone https://gitlab.com/mlouhivu/gpaw.git gpaw-$gpaw_version
 cd gpaw-$gpaw_version
-git checkout $gpaw_version
+git checkout $gpaw_commit
 patch gpaw/eigensolvers/rmm_diis.py ../setup/patch-rmmdiis.diff
 cp ../setup/customize-cuda.py .
 ln -s ../setup/gcc.py
