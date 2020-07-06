@@ -55,6 +55,7 @@ patch -N -p1 < ../setup/eigensolver_20_1.0.patch
 patch -N -p1 < ../setup/fdpw_20_1.0.patch
 patch -N -p1 < ../setup/hirshfeld.patch
 patch -N -p1 < ../setup/xc_as_string.patch
+patch -N -p1 < ../setup/lrtdfft2.patch
 
 python3 -m pip install --verbose --prefix $tgt . 2>&1 | tee  ../build-gpaw-$version.log
 cd ..

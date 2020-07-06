@@ -1,0 +1,12 @@
+diff --git a/gpaw/lrtddft2/__init__.py b/gpaw/lrtddft2/__init__.py
+index 41456be..00c86e6 100644
+--- a/gpaw/lrtddft2/__init__.py
++++ b/gpaw/lrtddft2/__init__.py
+@@ -406,6 +406,7 @@ class LrTDDFT2:
+                     os.remove(ready_file)
+                 for K_file in glob.glob(self.basefilename + '.K_matrix.*'):
+                     os.remove(K_file)
++            self.K_matrix.read_indices()
+             self.K_matrix.calculate()
+         elif self.recalculate == 'eigen':
+             self.K_matrix.read_indices()
