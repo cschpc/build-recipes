@@ -39,6 +39,7 @@ patch -N < ../setup/setup_20.1.0.patch
 patch -N -p1 < ../setup/calculator_20.1.0.patch
 patch -N -p1 < ../setup/eigensolver_20_1.0.patch
 patch -N -p1 < ../setup/fdpw_20_1.0.patch
+patch -N -p1 < ../setup/xc_as_string.patch
 
 pip3 install --verbose --prefix $tgt . 2>&1 | tee gpaw-install.log
 cd ..

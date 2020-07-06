@@ -1,0 +1,31 @@
+diff --git a/gpaw/paw.py b/gpaw/paw.py
+index 250f65fc6..ca911f891 100644
+--- a/gpaw/paw.py
++++ b/gpaw/paw.py
+@@ -199,8 +199,10 @@ class PAW:
+ 
+         'LDA', 'PBE', ..."""
+ 
+-        return self.parameters.get('xc', 'LDA')
+-        return self.hamiltonian.xc.name
++        xc = self.parameters.get('xc', 'LDA')
++        if isinstance(xc, dict):
++            xc = xc['name']
++        return xc
+ 
+     def get_number_of_spins(self):
+         return self.wfs.nspins
+diff --git a/gpaw/test/exx/test_coarse.py b/gpaw/test/exx/test_coarse.py
+index 8566756f1..4432b41c6 100644
+--- a/gpaw/test/exx/test_coarse.py
++++ b/gpaw/test/exx/test_coarse.py
+@@ -45,7 +45,8 @@ def test_exx_coarse(in_tmp_dir):
+             fname = 'exx_load.gpw'
+             calc.write(fname)
+             calcl = GPAW(fname)
+-            func = calcl.get_xc_functional()
++            func = calcl.parameters.xc
++
+             assert func['name'] == 'PBE0', 'wrong name for functional'
+             assert func['hybrid'] == 0.25, 'wrong factor for functional'
+ 
