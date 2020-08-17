@@ -1,0 +1,13 @@
+diff --git a/gpaw/calculator.py b/gpaw/calculator.py
+index 98adf57..687ec79 100644
+--- a/gpaw/calculator.py
++++ b/gpaw/calculator.py
+@@ -256,7 +256,7 @@ class GPAW(PAW, Calculator):
+ 
+         return reader
+ 
+-    def check_state(self, atoms, tol=1e-15):
++    def check_state(self, atoms, tol=1e-12):
+         system_changes = Calculator.check_state(self, atoms, tol)
+         if 'positions' not in system_changes:
+             if self.hamiltonian:

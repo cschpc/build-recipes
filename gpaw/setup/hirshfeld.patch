@@ -1,0 +1,20 @@
+diff --git a/gpaw/analyse/hirshfeld.py b/gpaw/analyse/hirshfeld.py
+index 38ab60d..9375f5c 100644
+--- a/gpaw/analyse/hirshfeld.py
++++ b/gpaw/analyse/hirshfeld.py
+@@ -124,10 +124,14 @@ class HirshfeldPartitioning:
+     def get_effective_volume_ratios(self):
+         """Return the list of effective volume to free volume ratios."""
+         self.initialize()
++        kptband_comm = self.calculator.comms['D']
+         ratios = []
+         for a, atom in enumerate(self.atoms):
+             ratios.append(self.get_effective_volume_ratio(a))
+-        return np.array(ratios)
++
++        ratios = np.array(ratios)
++        kptband_comm.broadcast(ratios, 0)
++        return ratios
+ 
+     def get_effective_volume_ratio(self, atom_index):
+         """Effective volume to free volume ratio.
