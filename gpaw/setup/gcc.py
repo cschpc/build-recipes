@@ -56,10 +56,12 @@ for arg in sys.argv[1:]:
 
 # set default optimisation level and flags
 if fragile:
-    optimise = min(fragile_level, optimise)
+    if optimise is not None:
+        optimise = min(fragile_level, optimise)
     flags = fragile_flags
 else:
-    optimise = max(default_level, optimise)
+    if optimise is not None:
+        optimise = max(default_level, optimise)
     flags = default_flags
 
 # add optimisation level to flags
