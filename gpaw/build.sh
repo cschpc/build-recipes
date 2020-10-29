@@ -21,8 +21,8 @@ export LIBXCDIR=/appl/soft/phys/libxc/$libxc_version
 git clone https://gitlab.com/gpaw/gpaw.git gpaw-$gpaw_version
 cd gpaw-$gpaw_version
 git checkout $gpaw_version
-#patch gpaw/test/test.py ../setup/patch-test.diff
-patch gpaw/test/xc/xc.py ../setup/patch-xc.diff
+#patch gpaw/test/test.py ../setup/test.patch
+patch gpaw/test/xc/xc.py ../setup/xc.patch
 ln -s ../setup/gcc.py
 python3 setup.py install --customize=../setup/customize-puhti.py --prefix=$tgt 2>&1 | tee loki-inst
 cd ..
