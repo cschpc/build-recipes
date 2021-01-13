@@ -25,10 +25,9 @@ export TCL_LIBRARY=$TCL_ROOT/lib/tcl8.6
 export TK_LIBRARY=$TK_ROOT/lib/tk8.6
 
 # build and install
-srcdir=`pwd`
-builddir=$TMPDIR
-cd $builddir
-$srcdir/configure --prefix=$tgt --disable-shared --disable-ipv6 --with-tcltk-includes="-I$TCL_ROOT/include -I$TK_ROOT/include" --with-tcltk-libs="-L$TCL_ROOT/lib -L$TK_ROOT/lib -ltcl8.6 -ltk8.6" 2>&1 | tee loki-conf
+src=$(pwd)
+cd $TMPDIR
+$src/configure --prefix=$tgt --disable-shared --disable-ipv6 --with-tcltk-includes="-I$TCL_ROOT/include -I$TK_ROOT/include" --with-tcltk-libs="-L$TCL_ROOT/lib -L$TK_ROOT/lib -ltcl8.6 -ltk8.6" 2>&1 | tee loki-conf
 make 2>&1 | tee loki-make
 make install 2>&1 | tee loki-inst
 cd -
@@ -46,4 +45,3 @@ pip3 install wheel
 # fix permissions
 chmod -R g=u $tgt
 chmod -R o+rX $tgt
-
