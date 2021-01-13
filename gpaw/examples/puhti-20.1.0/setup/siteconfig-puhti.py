@@ -17,12 +17,12 @@ include_dirs += [os.environ['LIBXCDIR'] + '/include']
 libraries += ['xc']
 
 # MKL
-libraries += ['mkl_intel_lp64' ,'mkl_sequential' ,'mkl_core']
+libraries += ['mkl_intel_lp64' ,'mkl_sequential', 'mkl_core']
 
 # ScaLAPACK
 scalapack = True
 if scalapack:
-    mpi_libraries += ['mkl_scalapack_lp64', 'mkl_blacs_intelmpi_lp64']
+    mpi_libraries += ['mkl_scalapack_lp64', 'mkl_blacs_openmpi_lp64']
 
 # GPAW defines
 define_macros += [('GPAW_NO_UNDERSCORE_CBLACS', '1')]

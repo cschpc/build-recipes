@@ -1,11 +1,13 @@
-# Custom GPAW setup for Puhti (Bull Sequana X1000)
+# Custom GPAW setup for Mahti (Bull Sequana XH2000)
 import os
+parallel_python_interpreter = True
 
 # compiler and linker
-compiler = './gcc.py'
-mpicompiler = './gcc.py'
+compiler = os.environ['CC']
+mpicompiler = 'mpicc'
 mpilinker = 'mpicc'
-extra_compile_args = ['-std=c99', '-O3', '-fopenmp-simd']
+extra_compile_args = ['-std=c99', '-O3', '-fopenmp-simd', '-march=native',
+                      '-mtune=native', '-mavx2']
 
 # libraries
 libraries = ['z']
@@ -16,15 +18,16 @@ include_dirs += [os.environ['LIBXCDIR'] + '/include']
 libraries += ['xc']
 
 # MKL
-libraries += ['mkl_intel_lp64' ,'mkl_sequential' ,'mkl_core']
-mpi_libraries += ['mkl_scalapack_lp64', 'mkl_blacs_intelmpi_lp64']
+libraries += os.environ['BLAS_LIBS'].split()
 
-# ScaLAPACK and HDF5
+# ScaLAPACK
 scalapack = True
-hdf5 = False
+if scalapack:
+    libraries += os.environ['SCALAPACK_LIBS'].split()
 
 # GPAW defines
 define_macros += [('GPAW_NO_UNDERSCORE_CBLACS', '1')]
 define_macros += [('GPAW_NO_UNDERSCORE_CSCALAPACK', '1')]
 define_macros += [("GPAW_ASYNC",1)]
 define_macros += [("GPAW_MPI2",1)]
+
