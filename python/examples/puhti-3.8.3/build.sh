@@ -1,5 +1,5 @@
 # target directory for installation
-tgt=/appl/soft/phys/gpaw/python/3.8.3
+tgt=$PROJAPPL_HPC/appl/python/3.8.3
 
 # fetch source code
 git clone https://github.com/python/cpython
@@ -42,4 +42,3 @@ pip3 install wheel
 # fix permissions
 chmod -R g=u $tgt
 chmod -R o+rX $tgt
-
