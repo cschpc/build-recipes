@@ -1,43 +1,31 @@
-#!/bin/bash
+### GPAW installation script for Mahti
+###   uses --prefix to set a custom installation directory
 
-# reset env
-module purge
-unset PYTHONPATH
-
+# version numbers (modify if needed)
 gpaw_version=20.1.0
-# gpaw_git_version=20.1.0-thread
 gpaw_git_version=$gpaw_version
-
-# version=$gpaw_version-gcc-openblas-omp
-# module load gcc openmpi openblas/0.3.10-omp netlib-scalapack/2.1.0-omp
-version=$gpaw_version-gcc-openblas
-module load gcc openmpi openblas/0.3.10 netlib-scalapack/2.1.0
-
-export CC=gcc
-
-export BLAS_LIBS="openblas"
-export SCALAPACK_LIBS="scalapack"
-
-# version=$gpaw_version-gcc-blis
-# module load gcc openmpi amdblis/2.2 amdlibflame/2.2 amdscalapack/2.2
-
-# export CC=gcc
-
-# export BLAS_LIBS="blis flame"
-# export SCALAPACK_LIBS="scalapack"
-
-# export GPAW_CONFIG=`pwd`/setup/customize-mahti-mt.py
-export GPAW_CONFIG=`pwd`/setup/customize-mahti.py
-
-source /appl/soft/phys/gpaw/python/3.8.2/load.sh gpaw-$gpaw_version
-
 libxc_version=4.3.4
-export LIBXCDIR=/users/jenkovaa/libxc/$libxc_version
+version=$gpaw_version-gcc-openblas
 
+# installation directory (modify!)
 tgt=/appl/soft/phys/gpaw/$version
 
+# setup build environment
+module purge
+unset PYTHONPATH
+module load gcc
+module load openmpi
+module load openblas/0.3.10
+module load netlib-scalapack/2.1.0
+source /appl/soft/phys/gpaw/python/3.8.2/load.sh gpaw-$gpaw_version
+export CC=gcc
+export BLAS_LIBS="openblas"
+export SCALAPACK_LIBS="scalapack"
+export GPAW_CONFIG=$(pwd)/setup/siteconfig-mahti.py
+export LIBXCDIR=/users/jenkovaa/libxc/$libxc_version
 
-if [ -d "gpaw-$gpaw_git_version" ] 
+# gpaw
+if [ -d "gpaw-$gpaw_git_version" ]
 then
     cd gpaw-$gpaw_git_version
 else
@@ -45,18 +33,14 @@ else
     cd gpaw-$gpaw_git_version
     git checkout $gpaw_git_version
 fi
-
-
-# apply patches
-patch -N < ../setup/config_20.1.0.patch
-patch -N < ../setup/setup_20.1.0.patch
-patch -N -p1 < ../setup/calculator_20.1.0.patch
-patch -N -p1 < ../setup/eigensolver_20_1.0.patch
-patch -N -p1 < ../setup/fdpw_20_1.0.patch
+patch -N < ../setup/config.patch
+patch -N < ../setup/setup.patch
+patch -N -p1 < ../setup/calculator.patch
+patch -N -p1 < ../setup/eigensolver.patch
+patch -N -p1 < ../setup/fdpw.patch
 patch -N -p1 < ../setup/hirshfeld.patch
-patch -N -p1 < ../setup/xc_as_string.patch
+patch -N -p1 < ../setup/paw.patch
 patch -N -p1 < ../setup/lrtdfft2.patch
-
 python3 -m pip install --verbose --prefix $tgt . 2>&1 | tee  ../build-gpaw-$version.log
 cd ..
 
