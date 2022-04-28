@@ -14,6 +14,7 @@ tgt=$PYTHONHOME/bundle/2020-01
 numpy_version=1.17.5
 scipy_version=1.4.1
 ase_version=3.19.1
+pycuda_version=2019.1.2
 
 # setup build environment
 export CFLAGS='-fPIC -march=cascadelake -O3 -fopenmp'
@@ -54,6 +55,9 @@ patch setup.py ../setup/patch-ase.diff
 pip3 install --user . 2>&1 | tee loki-inst
 cd ..
 
+# pycuda
+pip3 install --user pycuda==$pycuda_version
+
 # set default bundle
 if [ ! -e "$(dirname $tgt)/default" ]
 then
@@ -65,4 +69,3 @@ fi
 # fix permissions
 chmod -R g=u $tgt
 chmod -R o+rX $tgt
-

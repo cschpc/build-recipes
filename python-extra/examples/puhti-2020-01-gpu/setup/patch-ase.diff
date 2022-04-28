@@ -1,0 +1,13 @@
+diff --git a/setup.py b/setup.py
+index 9a082f8..4ab9ddf 100644
+--- a/setup.py
++++ b/setup.py
+@@ -67,7 +67,7 @@ setup(name='ase',
+       license='LGPLv2.1+',
+       platforms=['unix'],
+       packages=find_packages(),
+-      install_requires=['numpy', 'scipy', 'matplotlib', 'flask'],
++      install_requires=['numpy', 'scipy', 'matplotlib<3.0', 'flask'],
+       extras_require={'docs': ['sphinx', 'sphinx_rtd_theme', 'pillow']},
+       package_data=package_data,
+       entry_points={'console_scripts': ['ase=ase.cli.main:main',
