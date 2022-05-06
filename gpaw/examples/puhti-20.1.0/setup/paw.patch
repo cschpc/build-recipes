@@ -1,0 +1,17 @@
+diff --git a/gpaw/paw.py b/gpaw/paw.py
+index 250f65fc6..ca911f891 100644
+--- a/gpaw/paw.py
++++ b/gpaw/paw.py
+@@ -199,8 +199,10 @@ class PAW:
+ 
+         'LDA', 'PBE', ..."""
+ 
+-        return self.parameters.get('xc', 'LDA')
+-        return self.hamiltonian.xc.name
++        xc = self.parameters.get('xc', 'LDA')
++        if isinstance(xc, dict):
++            xc = xc['name']
++        return xc
+ 
+     def get_number_of_spins(self):
+         return self.wfs.nspins
