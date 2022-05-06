@@ -96,6 +96,7 @@ prepend_path('LD_LIBRARY_PATH', pathJoin(python_base, 'lib'))
 
 setenv('GPAW_SETUP_PATH', '/appl/soft/phys/gpaw-setups/gpaw-setups-0.9.20000')
 
+setenv('MPLBACKEND', 'TkAgg')
 EOF
 if [ -z "$openmp" ]
 then
