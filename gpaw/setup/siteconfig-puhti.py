@@ -7,6 +7,7 @@ compiler = './gcc.py'
 mpicompiler = './gcc.py'
 mpilinker = 'mpicc'
 extra_compile_args = ['-std=c99', '-O3', '-fopenmp-simd']
+extra_link_args = ['-fopenmp']
 
 # libraries
 libraries = ['z']
