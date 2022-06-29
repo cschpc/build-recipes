@@ -28,10 +28,6 @@ git checkout $gpaw_commit
 patch gpaw/test/xc/test_xc.py ../setup/test_xc.patch
 patch gpaw/lrtddft2/__init__.py ../setup/lrtdfft2.patch
 cp ../setup/gcc.py .
-cd c/cuda
-cp ../../../setup/make.inc .
-make 2>&1 | tee loki-make
-cd -
 pip3 install --verbose --prefix=$tgt . 2>&1 | tee loki-inst
 cd ..
 
