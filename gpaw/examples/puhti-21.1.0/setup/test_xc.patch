@@ -1,0 +1,41 @@
+diff --git a/gpaw/test/xc/test_xc.py b/gpaw/test/xc/test_xc.py
+index 04e358f..a38f327 100644
+--- a/gpaw/test/xc/test_xc.py
++++ b/gpaw/test/xc/test_xc.py
+@@ -61,6 +61,7 @@ def test_xc_xc():
+                      tau_sg, dedtau_sg)
+         return e_g, np.concatenate((dedn_sg, dedsigma_xg, dedtau_sg))
+ 
++    failed = []
+     eps = 1.0e-6
+ 
+     n_xg = np.array(
+@@ -91,7 +92,12 @@ def test_xc_xc():
+                  abs(ds_xg[:2] - d0_xg[0]).max() +
+                  abs(ds_xg[2:5].sum(0) / 4 - d0_xg[1]).max() +
+                  abs(ds_xg[5:] - d0_xg[2]).max())
+-        equal(error, 0, 6e-9)
++        try:
++            equal(error, 0, 6e-9)
++        except AssertionError as e:
++            if func not in failed:
++                failed.append(func)
++            print('AssertionError ({0}): {1}'.format(func, e))
+         del xc
+ 
+     # Numbers from old lxc_xc.py test:
+@@ -126,5 +132,13 @@ def test_xc_xc():
+             d_xg[x] = 0.5 * f2(m_xg, xc)[0] / eps
+             m_xg[x] -= 2 * eps
+             d_xg[x] -= 0.5 * f2(m_xg, xc)[0] / eps
+-        equal(abs(d0_xg - d_xg).max(), 0, 2e-8)
++        try:
++            equal(abs(d0_xg - d_xg).max(), 0, 2e-8)
++        except AssertionError as e:
++            if func not in failed:
++                failed.append(func)
++            print('AssertionError ({0}): {1}'.format(func, e))
+         del xc
++
++    if failed:
++        raise AssertionError('Failed functionals: ' + ' '.join(failed))
