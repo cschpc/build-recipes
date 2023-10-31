@@ -3,57 +3,64 @@
 # reset env
 module purge
 
-gpaw_version=20.10.0
+main_dir=$PWD
+
+ase_version=3.22.1
+gpaw_version=23.9.1
 gpaw_git_version=${gpaw_version}
 #openmp=""
 openmp="-omp"
 
 modules=('gcc/11.2.0' 'openmpi/4.1.2' 'openblas/0.3.18-omp' 'fftw/3.3.10-mpi' 'netlib-scalapack/2.1.0')
 module load ${modules[@]}
-version=$gpaw_version-gcc-openblas-elpa$openmp
+#version=$gpaw_version-gcc-openblas-elpa$openmp
+version=$gpaw_version-gcc-openblas$openmp
 
-install_tgt=/appl/soft/phys/gpaw/$version
-module_base=/appl/modulefiles/gpaw
+# Production
+#install_tgt=/appl/soft/phys/gpaw/$version
+#module_base=/appl/modulefiles/gpaw
+# Testing
+install_tgt=$HOME/tmp/test_gpaw/gpaw/$version
+module_base=$HOME/tmp/test_gpaw/modulefiles/gpaw
+
 module_version=${gpaw_version}${openmp}
 
-spack_view=/appl/spack/v017/views/gpaw-python3.9/
-export PATH=$spack_view/bin:$PATH
-python=python3.9
+tmp=$TMPDIR/gpaw_build
+tmp_gpaw_git=$tmp/gpaw
 
-export CC=gcc
+rm -rf $tmp
+trap "rm -rf $tmp" EXIT
 
-export BLAS_LIBS="openblas"
-export SCALAPACK_LIBS="scalapack"
-export ELPADIR="/appl/spack/v017/install-tree/gcc-11.2.0/elpa-2021.05.001-a3dh2f"
+rm -rf $install_tgt
+mkdir -p $install_tgt
+mkdir -p $module_base
+
+spack_view=/appl/spack/v017/views/gpaw-python3.9
+python=$spack_view/bin/python3.9
+
 
 if [ -n "$openmp" ]
 then
-  export GPAW_CONFIG=`pwd`/setup/customize-mahti-mt-elpa.py
+  #export GPAW_CONFIG=$main_dir/setup/siteconfig-mahti-omp-elpa.py
+  export GPAW_CONFIG=$main_dir/setup/siteconfig-mahti-omp.py
 else
+  echo "Not implemented. ELPA has only openmp.so?"
+  exit 1
   export GPAW_CONFIG=`pwd`/setup/customize-mahti-elpa.py
 fi
 
-libxc_version=4.3.4
-export LIBXCDIR=/users/jenkovaa/libxc/$libxc_version
-#export LIBXCDIR=/appl/spack/v017/install-tree/gcc-11.2.0/libxc-5.1.5-oa6ihp
+# Install ASE for GPAW build (for writing git hash)
+$python -m pip install --prefix $install_tgt ase==$ase_version
+export PYTHONPATH=$install_tgt/lib/python3.9/site-packages:$PYTHONPATH
 
-if [ -d "gpaw-$gpaw_git_version" ] 
-then
-    cd gpaw-$gpaw_git_version
-else
-    cd gpaw
-    git fetch origin
-    cd ..
-    git clone gpaw gpaw-$gpaw_git_version
-    cd gpaw-$gpaw_git_version
-    git checkout $gpaw_git_version
-fi
+git clone https://gitlab.com/gpaw/gpaw.git $tmp_gpaw_git
+pushd $tmp_gpaw_git
+git checkout $gpaw_git_version
+$python -m pip install --verbose --prefix $install_tgt . 2>&1 | tee $main_dir/build-gpaw-$version.log
+popd
 
-# Clean up possible previous build
-$python setup.py clean -a
-
-$python -m pip install --verbose --prefix $install_tgt . 2>&1 | tee  ../build-gpaw-$version.log
-cd ..
+# Install pytest: don't do it! Otherwise pytest prepends this path to sys.path when run -> big mess with other modules!
+# $python -m pip install --prefix $install_tgt pytest
 
 # Create the module
 depend_clause=""
@@ -73,6 +80,19 @@ local version = '$version'
 if (mode() == "load") then
   LmodMessage("GPAW version " .. gpaw_version .. " is now in use")
   LmodMessage("Release notes: https://wiki.fysik.dtu.dk/gpaw/releasenotes.html")
+  LmodMessage("")
+  LmodMessage("This module comes with the stable ASE version $ase_version.")
+  LmodMessage("")
+  LmodMessage("To install the latest ASE development version for testing:")
+  LmodMessage("1. Fetch the ASE code (only once):")
+  LmodMessage("     git clone https://gitlab.com/ase/ase.git \$HOME/my_ase")
+  LmodMessage("     # Checkout the desired development version (commit hash):")
+  LmodMessage("     cd \$HOME/my_ase && git checkout <commit hash>")
+  LmodMessage("2. Activate this custom ASE (every time after loading gpaw module):")
+  LmodMessage("     export PYTHONPATH=\$HOME/my_ase:\$PYTHONPATH")
+  LmodMessage("3. Check that the correct versions are used:")
+  LmodMessage("     gpaw info")
+  LmodMessage("")
 end
 
 help('GPAW environment ' .. version)
@@ -83,25 +103,20 @@ whatis('URL: https://wiki.fysik.dtu.dk/gpaw')
 
 depends_on($depend_clause)
 
-gpaw_base = '$install_tgt'
 python_base = '$spack_view'
+gpaw_base = '$install_tgt'
 
-prepend_path('PYTHONPATH', pathJoin(gpaw_base, 'lib/python3.9/site-packages'))
-prepend_path('PYTHONPATH', pathJoin(gpaw_base, 'lib64/python3.9/site-packages'))
 prepend_path('PYTHONPATH', pathJoin(python_base, 'lib/python3.9/site-packages'))
-prepend_path('PYTHONPATH', pathJoin(python_base, 'lib64/python3.9/site-packages'))
-prepend_path('PATH', pathJoin(gpaw_base, 'bin'))
+prepend_path('PYTHONPATH', pathJoin(gpaw_base, 'lib/python3.9/site-packages'))
 prepend_path('PATH', pathJoin(python_base, 'bin'))
+prepend_path('PATH', pathJoin(gpaw_base, 'bin'))
 prepend_path('LD_LIBRARY_PATH', pathJoin(python_base, 'lib'))
 
 setenv('GPAW_SETUP_PATH', '/appl/soft/phys/gpaw-setups/gpaw-setups-0.9.20000')
 
 setenv('MPLBACKEND', 'TkAgg')
+setenv('OMP_NUM_THREADS', 1)
 EOF
-if [ -z "$openmp" ]
-then
-  echo "setenv('OMP_NUM_THREADS', 1)" >> ${module_base}/${module_version}.lua
-fi
 
 # fix permissions
 chmod -R g=u $install_tgt
