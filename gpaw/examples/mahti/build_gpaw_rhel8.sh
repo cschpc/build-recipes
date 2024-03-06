@@ -56,7 +56,7 @@ export PYTHONPATH=$install_tgt/lib/python3.9/site-packages:$PYTHONPATH
 git clone https://gitlab.com/gpaw/gpaw.git $tmp_gpaw_git
 pushd $tmp_gpaw_git
 git checkout $gpaw_git_version
-$python -m pip install --verbose --prefix $install_tgt . 2>&1 | tee $main_dir/build-gpaw-$version.log
+$python -m pip install --verbose --prefix $install_tgt . 2>&1 | tee $install_tgt/build-gpaw-$version.log
 popd
 
 # Install pytest: don't do it! Otherwise pytest prepends this path to sys.path when run -> big mess with other modules!
