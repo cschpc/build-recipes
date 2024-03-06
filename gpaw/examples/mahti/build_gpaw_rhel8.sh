@@ -1,4 +1,8 @@
 #!/bin/bash
+# Usage:
+#
+# cd .../build-recipes/gpaw
+# bash examples/mahti/build_gpaw_rhel8.sh
 
 # reset env
 module purge
