@@ -10,7 +10,7 @@ module purge
 main_dir=$PWD
 
 ase_version=3.22.1
-gpaw_version=23.9.1
+gpaw_version=24.1.0
 gpaw_git_version=${gpaw_version}
 #openmp=""
 openmp="-omp"
@@ -24,8 +24,8 @@ version=$gpaw_version-gcc-openblas$openmp
 #install_tgt=/appl/soft/phys/gpaw/$version
 #module_base=/appl/modulefiles/gpaw
 # Testing
-install_tgt=$HOME/tmp/test_gpaw/gpaw/$version
-module_base=$HOME/tmp/test_gpaw/modulefiles/gpaw
+install_tgt=$HOME/tmp/test_gpaw_1/gpaw/$version
+module_base=$HOME/tmp/test_gpaw_1/modulefiles/gpaw
 
 module_version=${gpaw_version}${openmp}
 
