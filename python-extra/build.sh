@@ -11,9 +11,9 @@ source $PYTHONHOME/load.sh
 tgt=$PYTHONHOME/bundle/2020-01
 
 # version numbers (modify if needed)
-numpy_version=1.17.5
-scipy_version=1.4.1
-ase_version=3.19.1
+numpy_version=1.24.2
+scipy_version=1.10.1
+ase_version=3.22.1
 
 # setup build environment
 export CFLAGS='-fPIC -march=cascadelake -O3 -fopenmp'
@@ -22,14 +22,14 @@ export CPPFLAGS=$CFLAGS
 
 # use --user to install modules
 export PYTHONUSERBASE=$tgt
-mkdir -p $PYTHONUSERBASE/lib/python3.8/site-packages
+mkdir -p $PYTHONUSERBASE/lib/python3.11/site-packages
 
 # cython + mpi4py
 pip install --user cython
 pip install --user mpi4py
 
 # numpy
-git clone git://github.com/numpy/numpy.git numpy-$numpy_version
+git clone https://github.com/numpy/numpy.git numpy-$numpy_version
 cd numpy-$numpy_version
 git checkout v$numpy_version
 # with MKL (for Puhti):
@@ -40,7 +40,7 @@ pip3 install --user . 2>&1 | tee loki-inst
 cd ..
 
 # scipy
-git clone git://github.com/scipy/scipy.git scipy-$scipy_version
+git clone https://github.com/scipy/scipy.git scipy-$scipy_version
 cd scipy-$scipy_version
 git checkout v$scipy_version
 pip3 install --user . 2>&1 | tee loki-inst
