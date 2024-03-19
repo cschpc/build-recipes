@@ -7,8 +7,9 @@ echo "--------------------------------------------------------------------------
 echo "- Load GPAW module"
 echo "--------------------------------------------------------------------------------"
 #module purge
-module use $HOME/tmp/test_gpaw_1/modulefiles/
-module load gpaw/$version
+module use $HOME/gpaw_test_1/modulefiles/
+module load my-gpaw/$version
+# module load gpaw/$version
 gpaw info
 
 

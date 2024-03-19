@@ -24,8 +24,8 @@ version=$gpaw_version-gcc-openblas$openmp
 #install_tgt=/appl/soft/phys/gpaw/$version
 #module_base=/appl/modulefiles/gpaw
 # Testing
-install_tgt=$HOME/tmp/test_gpaw_1/gpaw/$version
-module_base=$HOME/tmp/test_gpaw_1/modulefiles/gpaw
+install_tgt=$HOME/gpaw_test_1/gpaw/$version
+module_base=$HOME/gpaw_test_1/modulefiles/my-gpaw
 
 module_version=${gpaw_version}${openmp}
 
