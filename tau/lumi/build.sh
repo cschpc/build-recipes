@@ -1,8 +1,11 @@
 #!/bin/bash
 
+modification_date=2024-05-30
+authors="Juhana Lankinen, "
+
 echo "This script downloads and installs TAU"
 echo "It's configured to work on LUMI"
-echo "Last update on 2024-05-29"
+echo "Last update on $modification_date"
 
 if [ $# -eq 0 ] || [ ! -d "$1" ]
 then
@@ -69,25 +72,33 @@ ml rocm/$rocm_version
 
 echo "Configuring and installing"
 
-base_conf="-bfd=download -otf=download -unwind=download -dwarf=download -iowrapper -cc=cc -c++=CC -fortran=ftn -pthread -mpi"
+compiler_conf="-cc=cc -c++=CC -fortran=ftn"
+io_conf="-iowrapper"
+
+base_conf="-bfd=download -otf=download -unwind=download -dwarf=download $io_conf $compiler_conf"
+
+pthread_conf="-pthread"
+omp_conf="-openmp"
+
 python_conf="-python"
+mpi_conf="-mpi"
+
 papi_conf="-papi=/opt/cray/pe/papi/$papi_version"
 rocm_conf="-rocm=/opt/rocm-$rocm_version"
 rocprofiler_conf="-rocprofiler=/opt/rocm-$rocm_version/rocprofiler"
 roctracer_conf="-roctracer=/opt/rocm-$rocm_version/roctracer"
+pdt_conf="-pdt=download"
+external_packages_conf="$papi_conf $rocm_conf $rocprofiler_conf $roctracer_conf $pdt_conf"
 
 declare configs
 configs=(
-    "$base_conf"
-    "$base_conf $python_conf"
-    "$base_conf $python_conf $papi_conf"
-    "$base_conf $python_conf $papi_conf $rocm_conf"
-    "$base_conf $python_conf $papi_conf $rocm_conf $rocprofiler_conf"
-    "$base_conf $python_conf $papi_conf $rocm_conf $roctracer_conf"
-    "$base_conf $papi_conf"
-    "$base_conf $papi_conf $rocm_conf"
-    "$base_conf $papi_conf $rocm_conf $rocprofiler_conf"
-    "$base_conf $papi_conf $rocm_conf $roctracer_conf"
+    "$base_conf" "$external_packages_conf"
+    "$base_conf" "$external_packages_conf" "$pthread_conf"
+    "$base_conf" "$external_packages_conf" "$pthread_conf" "$mpi_conf"
+    "$base_conf" "$external_packages_conf" "$pthread_conf" "$mpi_conf" "$python_conf"
+    "$base_conf" "$external_packages_conf" "$omp_conf"
+    "$base_conf" "$external_packages_conf" "$omp_conf" "$mpi_conf"
+    "$base_conf" "$external_packages_conf" "$omp_conf" "$mpi_conf" "$python_conf"
 )
 
 for conf in "${configs[@]}"; do
