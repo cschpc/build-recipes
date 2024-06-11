@@ -4,11 +4,11 @@
 # If you need to reinstall tau, it's probably best to remove the old directory altogether
 # and then rerun this script
 
-modification_date=2024-05-30
+modification_date=2024-06-06
 authors="Juhana Lankinen, "
 
 echo "This script downloads and installs TAU"
-echo "It's configured to work on LUMI"
+echo "It's configured to work on a local computer"
 echo "Last update on $modification_date"
 
 if [ $# -eq 0 ] || [ ! -d "$1" ]
@@ -89,24 +89,12 @@ wget $ext_deps_url -N || \
 tar -xzf $ext_deps_tarball --skip-old-files || \
     { echo "Couldn't extract files from tarball $ext_deps_tarball"; exit 1; }
 
-echo "Loading modules"
 # Change the versions as newer become available
-lumi_version=23.09
-python_version=3.10.10
-rocm_version=5.4.6
-gnu_version=8.4.0
-papi_version=7.0.1.1
-
-ml LUMI/$lumi_version
-ml partition/G
-ml cray-python/$python_version
-ml PrgEnv-gnu/$gnu_version
-ml craype-accel-amd-gfx90a
-ml rocm/$rocm_version
+papi_version=6.0
 
 echo "Configuring and installing"
 
-base_compiler_conf="-cc=cc -c++=CC -fortran=ftn"
+base_compiler_conf="-cc=gcc -c++=g++ -fortran=gfortran"
 mpi_compiler_conf="-cc=mpicc -c++=mpicxx -fortran=mpif90"
 io_conf="-iowrapper"
 base_conf="-bfd=download -otf=download -unwind=download -dwarf=download"
@@ -114,12 +102,12 @@ pthread_conf="-pthread"
 omp_conf="-openmp"
 python_conf="-python"
 mpi_conf="-mpi"
-papi_conf="-papi=/opt/cray/pe/papi/$papi_version"
-rocm_conf="-rocm=/opt/rocm-$rocm_version"
-rocprofiler_conf="-rocprofiler=/opt/rocm-$rocm_version/rocprofiler"
-roctracer_conf="-roctracer=/opt/rocm-$rocm_version/roctracer"
+papi_conf="-papi=/usr/share/papi/$papi_version"
+#rocm_conf="-rocm=/opt/rocm-$rocm_version"
+#rocprofiler_conf="-rocprofiler=/opt/rocm-$rocm_version/rocprofiler"
+#roctracer_conf="-roctracer=/opt/rocm-$rocm_version/roctracer"
 pdt_conf="-pdt=$pdt_dir"
-external_packages_conf="$papi_conf $rocm_conf $rocprofiler_conf $roctracer_conf $pdt_conf"
+external_packages_conf="$papi_conf $pdt_conf"
 
 declare configs
 configs=(
