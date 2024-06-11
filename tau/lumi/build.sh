@@ -114,7 +114,7 @@ mpi_conf="-mpi"
 papi_conf="-papi=/opt/cray/pe/papi/$papi_version"
 rocm_conf="-rocm=/opt/rocm-$rocm_version"
 rocprofiler_conf="-rocprofiler=$(which rocprof)"
-roctracer_conf="-roctracer=$(which roctrace)
+roctracer_conf="-roctracer=$(which roctrace)"
 pdt_conf="-pdt=$pdt_dir"
 external_packages_conf="$papi_conf $rocm_conf $rocprofiler_conf $roctracer_conf $pdt_conf"
 
