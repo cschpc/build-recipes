@@ -38,11 +38,13 @@ lumi_version=23.09
 python_version=3.10.10
 rocm_version=5.4.6
 papi_version=7.0.1.1
+gnu_version=8.4.0
 
 ml LUMI/$lumi_version
 ml partition/G
 ml cray-python/$python_version
 ml rocm/$rocm_version
+ml PrgEnv-gnu/$gnu_version
 
 rocm_path=/appl/lumi/SW/LUMI-$lumi_version/G/EB/rocm/$rocm_version
 [ -d $rocm_path ] || { echo "$rocm_path is not a directory"; exit 1; }
