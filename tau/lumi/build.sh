@@ -94,20 +94,17 @@ echo "Loading modules"
 lumi_version=23.09
 python_version=3.10.10
 rocm_version=5.4.6
-gnu_version=8.4.0
 papi_version=7.0.1.1
 
 ml LUMI/$lumi_version
 ml partition/G
 ml cray-python/$python_version
-ml PrgEnv-gnu/$gnu_version
-ml craype-accel-amd-gfx90a
 ml rocm/$rocm_version
+
 
 echo "Configuring and installing"
 
 base_compiler_conf="-cc=cc -c++=CC -fortran=ftn"
-mpi_compiler_conf="-cc=mpicc -c++=mpicxx -fortran=mpif90"
 io_conf="-iowrapper"
 base_conf="-bfd=download -otf=download -unwind=download -dwarf=download"
 pthread_conf="-pthread"
@@ -116,8 +113,8 @@ python_conf="-python"
 mpi_conf="-mpi"
 papi_conf="-papi=/opt/cray/pe/papi/$papi_version"
 rocm_conf="-rocm=/opt/rocm-$rocm_version"
-rocprofiler_conf="-rocprofiler=/opt/rocm-$rocm_version/rocprofiler"
-roctracer_conf="-roctracer=/opt/rocm-$rocm_version/roctracer"
+rocprofiler_conf="-rocprofiler=$(which rocprof)"
+roctracer_conf="-roctracer=$(which roctrace)
 pdt_conf="-pdt=$pdt_dir"
 external_packages_conf="$papi_conf $rocm_conf $rocprofiler_conf $roctracer_conf $pdt_conf"
 
@@ -125,11 +122,11 @@ declare configs
 configs=(
     "$base_conf $io_conf $base_compiler_conf $external_packages_conf"
     "$base_conf $io_conf $base_compiler_conf $external_packages_conf $pthread_conf"
-    "$base_conf $io_conf $mpi_compiler_conf  $external_packages_conf $pthread_conf $mpi_conf"
-    "$base_conf $io_conf $mpi_compiler_conf  $external_packages_conf $pthread_conf $mpi_conf $python_conf"
+    "$base_conf $io_conf $base_compiler_conf $external_packages_conf $pthread_conf $mpi_conf"
+    "$base_conf $io_conf $base_compiler_conf $external_packages_conf $pthread_conf $mpi_conf $python_conf"
     "$base_conf $io_conf $base_compiler_conf $external_packages_conf $omp_conf"
-    "$base_conf $io_conf $mpi_compiler_conf  $external_packages_conf $omp_conf $mpi_conf"
-    "$base_conf $io_conf $mpi_compiler_conf  $external_packages_conf $omp_conf $mpi_conf $python_conf"
+    "$base_conf $io_conf $base_compiler_conf $external_packages_conf $omp_conf $mpi_conf"
+    "$base_conf $io_conf $base_compiler_conf $external_packages_conf $omp_conf $mpi_conf $python_conf"
 )
 
 for conf in "${configs[@]}"; do
