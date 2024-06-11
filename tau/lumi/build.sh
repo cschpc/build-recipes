@@ -87,15 +87,6 @@ tar -xzf $tau_tarball -C $install_dir --strip-components=2 --skip-old-files || \
 
 cd $install_dir
 
-echo_with_lines "Downloading external dependencies"
-ext_deps_tarball=ext.tgz
-ext_deps_url=http://tau.uoregon.edu/$ext_deps_tarball
-wget $ext_deps_url -N || \
-    { echo "Couldn't get files from $ext_deps_url"; exit 1; }
-
-tar -xzf $ext_deps_tarball --skip-old-files || \
-    { echo "Couldn't extract files from tarball $ext_deps_tarball"; exit 1; }
-
 echo_with_lines "Configuring and installing"
 base_compiler_conf="-cc=cc -c++=CC -fortran=ftn"
 io_conf="-iowrapper"
