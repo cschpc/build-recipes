@@ -11,7 +11,7 @@ echo "--------------------------------------------------------------------------
 }
 
 
-modification_date=2024-06-11
+modification_date=2024-06-13
 authors="Juhana Lankinen, "
 
 echo_with_lines "This script downloads and installs TAU. It's configured to work on LUMI. Last update on $modification_date"
@@ -31,23 +31,6 @@ mkdir -p $tau_dir || \
     { echo "Failed to create directory $tau_dir"; exit 1; }
 
 cd $tau_dir
-
-echo_with_lines "Loading modules"
-# Change the versions as newer become available
-lumi_version=23.09
-python_version=3.10.10
-rocm_version=5.4.6
-papi_version=7.0.1.1
-gnu_version=8.4.0
-
-ml LUMI/$lumi_version
-ml partition/G
-ml cray-python/$python_version
-ml rocm/$rocm_version
-ml PrgEnv-gnu/$gnu_version
-
-rocm_path=/appl/lumi/SW/LUMI-$lumi_version/G/EB/rocm/$rocm_version
-[ -d $rocm_path ] || { echo "$rocm_path is not a directory"; exit 1; }
 
 echo_with_lines "Downloading PDT"
 pdt_tarball=pdt_lite.tgz
@@ -88,35 +71,53 @@ tar -xzf $tau_tarball -C $install_dir --strip-components=2 --skip-old-files || \
 cd $install_dir
 
 echo_with_lines "Configuring and installing"
+configure_install() {
+    echo_with_lines "Configuring and installing with $1"
+    (./configure $1 && make install -j 8) || \
+        { echo "Failed to configure and install TAU with $1"; exit 1; }
+}
+
 base_compiler_conf="-cc=cc -c++=CC -fortran=ftn"
 io_conf="-iowrapper"
 base_conf="-bfd=download -otf=download -unwind=download -dwarf=download"
+pdt_conf="-pdt=$pdt_dir"
+papi_conf="-papi=/opt/cray/pe/papi/$papi_version"
 pthread_conf="-pthread"
 omp_conf="-openmp"
 python_conf="-python"
 mpi_conf="-mpi"
-papi_conf="-papi=/opt/cray/pe/papi/$papi_version"
-rocm_conf="-rocm=$rocm_path"
+
+common="$base_conf $io_conf $base_compiler_conf $pdt_conf $papi_conf $mpi_conf $python_conf"
+
+echo "Loading modules"
+# Change the versions as newer become available
+lumi_version=23.09
+python_version=3.10.10
+rocm_version=5.4.6
+papi_version=7.0.1.1
+gnu_version=8.4.0
+
+ml LUMI/$lumi_version
+ml partition/C
+ml cray-python/$python_version
+ml PrgEnv-gnu/$gnu_version
+
+# Configure for CPU
+configure_install "$common $pthread_conf"
+configure_install "$common $omp_conf"
+
+# Configure for GPU
+ml partition/G
+ml rocm/$rocm_version
+
+rocm_path=/appl/lumi/SW/LUMI-$lumi_version/G/EB/rocm/$rocm_version
+[ -d $rocm_path ] || { echo "$rocm_path is not a directory"; exit 1; }
+
 rocprofiler_conf="-rocprofiler=$rocm_path/rocprofiler"
 roctracer_conf="-roctracer=$rocm_path/roctracer"
-pdt_conf="-pdt=$pdt_dir"
-external_packages_conf="$papi_conf $rocm_conf $rocprofiler_conf $roctracer_conf $pdt_conf"
+rocm_conf="-rocm=$rocm_path $rocprofiler_conf $roctracer_conf"
 
-declare configs
-configs=(
-    "$base_conf $io_conf $base_compiler_conf $external_packages_conf"
-    "$base_conf $io_conf $base_compiler_conf $external_packages_conf $pthread_conf"
-    "$base_conf $io_conf $base_compiler_conf $external_packages_conf $pthread_conf $mpi_conf"
-    "$base_conf $io_conf $base_compiler_conf $external_packages_conf $pthread_conf $mpi_conf $python_conf"
-    "$base_conf $io_conf $base_compiler_conf $external_packages_conf $omp_conf"
-    "$base_conf $io_conf $base_compiler_conf $external_packages_conf $omp_conf $mpi_conf"
-    "$base_conf $io_conf $base_compiler_conf $external_packages_conf $omp_conf $mpi_conf $python_conf"
-)
-
-for conf in "${configs[@]}"; do
-    echo_with_lines "Configuring and installing with $conf"
-    (./configure $conf && make install -j 8) || \
-        { echo "Failed to configure and install TAU with $conf"; exit 1; }
-done
+configure_install "$common $rocm_conf $pthread_conf"
+configure_install "$common $rocm_conf $omp_conf"
 
 echo_with_lines "TAU installation successful!"
