@@ -21,7 +21,7 @@ download_and_extract() {
     tarball=$2
     url=$3
 
-    [ -d $dir ] || { echo "$dir already exists. Use a fresh directory."; exit 1; }
+    [ ! -d "$dir" ] || { echo "$dir already exists. Use a fresh directory."; exit 1; }
     mkdir -p $dir || { echo "Failed to create directory $dir"; exit 1; }
     echo "Downloading $tarball from $url"
     wget $url -N || { echo "Couldn't get files from $url"; exit 1; }
@@ -48,6 +48,7 @@ version_number_regexp='^[0-9]+([.][0-9]+)*$'
         exit 1; }
 
 base_dir=$(realpath $1)/tau
+mkdir -p $base_dir
 cd $base_dir
 
 echo_with_lines "Downloading and extracting PDT and TAU"
@@ -76,11 +77,11 @@ echo_with_lines "Configuring and installing PDT"
 
 cd $tau_dir
 
-echo "Hack: Adding C/C++ std libraries to CRAY_FORTRAN TAU_FORTRANLIBS so compiling fortran with tau works"
+echo "Hack: Adding C/C++ std libraries to TAU_LINKER_OPT2 so compiling fortran with tau works"
 make_skel_files=$(find $tau_dir -name "Makefile.skel")
 for file in $make_skel_files
 do
-    sed -i "s/\(#CRAY_FORTRAN#TAU_FORTRANLIBS.*\)#ENDIF#/\1 -L\$(TAUGCCLIBDIR) \$(TAUGCCLIBOPTS) -lstdc++ \$(TAU_GCCLIB) #ENDIF#/g" $file
+    sed -i "s/^\(TAU_LINKER_OPT2.*\)/\1 -lstdc++/g" $file
 done
 
 echo_with_lines "Configuring and installing TAU"
