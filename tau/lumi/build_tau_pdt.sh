@@ -1,6 +1,6 @@
 #!/bin/bash
 
-modification_date=2024-06-27
+modification_date=2024-06-28
 authors="Juhana Lankinen, "
 
 # Change the versions as newer become available
