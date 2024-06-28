@@ -1,6 +1,7 @@
 #!/bin/bash
 
 cd $CW_INSTALLATION_PATH
+python3 -c "import pandas; print(pandas._version)"
 wget https://github.com/AMDResearch/omniperf/releases/download/v1.1.0-PR1/omniperf-v1.1.0-PR1.tar.gz
 tar xfz omniperf-v1.1.0-PR1.tar.gz
 cd omniperf-1.1.0-PR1/

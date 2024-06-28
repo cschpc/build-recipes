@@ -7,7 +7,7 @@ authors="Juhana Lankinen, "
 lumi_version=23.09
 rocm_version=5.4.6
 papi_version=7.0.1.1
-gnu_version=8.4.0
+cray_version=8.4.0
 
 echo_with_lines () {
 echo "--------------------------------------------------------------------------------"
@@ -42,7 +42,7 @@ version_number_regexp='^[0-9]+([.][0-9]+)*$'
     [ -d "$1" ] && \
     [[ "$2" =~ $version_number_regexp ]]) || \
     { echo "Usage: $0 /path/to/install/dir tau-version"; \
-        echo "E.g. \"$0 /projappl/project_465001194/apps 2.33.2\"";
+        echo "E.g. \"$0 /projappl/project_465001194/apps 2.33.1\"";
         exit 1; }
 
 base_dir=$(realpath $1)/tau
@@ -56,7 +56,7 @@ tau_tarball=tau-$tau_version.tar.gz
 tau_url=https://www.cs.uoregon.edu/research/tau/tau_releases/$tau_tarball
 download_and_extract $tau_dir $tau_tarball $tau_url
 
-ml PrgEnv-gnu/$gnu_version
+ml PrgEnv-cray/$cray_version
 ml LUMI/$lumi_version
 ml partition/G
 ml craype-accel-amd-gfx90a
@@ -70,7 +70,7 @@ compiler_conf="-cc=cc -c++=CC -fortran=ftn"
 io_conf="-iowrapper"
 downloads_conf="-bfd=download -otf=download -unwind=download -dwarf=download"
 papi_conf="-papi=/opt/cray/pe/papi/$papi_version"
-omp_conf="-openmp"
+omp_conf="-ompt"
 mpi_conf="-mpi"
 
 common="$downloads_conf $io_conf $compiler_conf $papi_conf $mpi_conf"
