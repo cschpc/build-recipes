@@ -1,14 +1,15 @@
 #!/bin/bash
 
-[ $# -e 4 ] || { echo "Give four arguments:\
-    \n\tpath to requirements.txt\
-    \n\tpath to install dir\
-    \n\tpath to post build script\
-    \n\tpath to env.yaml\
-    For example:\
-    \n\t./build.sh requirements.txt /projappl/project_465001194/apps/omniperf post_build.sh env.yaml
-    ";
-    exit 1; }
+[ $# -eq 4 ] || { 
+    echo "Give four arguments:"
+    echo "path to requirements.txt"
+    echo "path to install dir"
+    echo "path to post build script"
+    echo "path to env.yaml"
+    echo "For example:"
+    echo "./build.sh requirements.txt /projappl/project_465001194/apps/omniperf post_build.sh env.yaml"
+    exit 1
+}
 
 requirements=$1
 prefix=$2
