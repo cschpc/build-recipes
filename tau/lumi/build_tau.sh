@@ -40,8 +40,7 @@ version_number_regexp='^[0-9]+([.][0-9]+)*$'
 
 ([ $# -eq 2 ] && \
     [ -d "$1" ] && \
-    [[ "$2" =~ $version_number_regexp ]] && \
-    [[ "$3" =~ $version_number_regexp ]]) || \
+    [[ "$2" =~ $version_number_regexp ]] || \
     { echo "Usage: $0 /path/to/install/dir tau-version"; \
         echo "E.g. \"$0 /projappl/project_465001194/apps 2.33.2\"";
         exit 1; }
