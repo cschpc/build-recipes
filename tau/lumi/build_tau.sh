@@ -7,7 +7,7 @@ authors="Juhana Lankinen, "
 lumi_version=23.09
 rocm_version=5.4.6
 papi_version=7.0.1.1
-cray_version=8.4.0
+gnu_version=8.4.0
 
 echo_with_lines () {
 echo "--------------------------------------------------------------------------------"
@@ -56,7 +56,7 @@ tau_tarball=tau-$tau_version.tar.gz
 tau_url=https://www.cs.uoregon.edu/research/tau/tau_releases/$tau_tarball
 download_and_extract $tau_dir $tau_tarball $tau_url
 
-ml PrgEnv-cray/$cray_version
+ml PrgEnv-gnu/$gnu_version
 ml LUMI/$lumi_version
 ml partition/G
 ml craype-accel-amd-gfx90a
