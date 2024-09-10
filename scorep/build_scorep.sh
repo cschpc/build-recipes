@@ -118,7 +118,6 @@ load_modules_and_generate_module_string() {
     done
 }
 
-
 echo_with_lines "This script downloads and installs Score-P. It's configured to work on Mahti. Last update on $modification_date"
 version_number_regexp='^[0-9]+([.][0-9]+)*$'
 
@@ -149,18 +148,18 @@ cd ${scorep_dir}
 find_path_of "papi" "${LIBRARY_PATH}"
 
 # Add Score-P configuration options for different configurations
-declare -A config_options
+declare -a config_options
 config_options=(
-    ["${compiler}"]="--with-nocross-compiler-suite=${compiler}"
-    ["${mpi}"]="--with-mpi=${mpi}"
-    ["papi"]="--with-papi-headers=${found_path}/include --with-papi-lib=${found_path}/lib"
+    "--with-nocross-compiler-suite=${compiler}"
+    "--with-mpi=${mpi}"
+    "--with-papi-headers=${found_path}/include --with-papi-lib=${found_path}/lib"
+    "--with-libbfd=download"
 )
 config_str="--prefix=${scorep_dir}"
 
-# Loop over modules and choose config options based on those
-for name in ${module_names[@]}
+for ((i = 0; i < ${#config_options[@]}; i++))
 do
-    config_str="${config_str} ${config_options[${name}]}"
+    config_str="${config_str} ${config_options[i]}"
 done
 
 configure_install "${config_str}"
