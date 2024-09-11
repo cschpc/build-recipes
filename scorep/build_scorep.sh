@@ -9,6 +9,7 @@ authors="Juhana Lankinen, "
 # - others
 compiler="gcc"
 mpi="openmpi"
+binutils_path="/appl/spack/v020/install-tree/gcc-8.5.0/binutils-2.40-nt5ao6/"
 
 # List loaded modules and their versions
 declare -a module_names
@@ -25,38 +26,69 @@ module_versions=(
     "7.1.0"
 )
 
+# ===================================
+# Function definitions for the script
+# ===================================
+
 echo_with_lines () {
 echo "--------------------------------------------------------------------------------"
 echo "${1}"
-echo "--------------------------------------------------------------------------------"
+echo ""
 }
 
-download_and_extract() {
-    dir=${1}
-    tarball=${2}
-    url=${3}
+echoerr() {
+    >&2 cat <<< "$@"
+}
 
-    [ ! -d "${dir}" ] || { echo "${dir} already exists. Use a fresh directory."; exit 1; }
-    mkdir -p ${dir} || { echo "Failed to create directory ${dir}"; exit 1; }
-    echo "Downloading ${tarball} from ${url}"
-    wget ${url} -N || { echo "Couldn't get files from ${url}"; exit 1; }
-    echo "Extacting ${tarball} to ${dir}"
-    tar -xzf ${tarball} -C ${dir} --strip-components=1 || { echo "Couldn't extract files from tarball ${tarball}"; exit 1; }
+fail_with_message() {
+    echoerr "$@"
+    exit 1
+}
+
+download_package() {
+    dest_dir=${1}
+    url=${2}
+
+    [ -d ${dest_dir} ] || fail_with_message "${dest_dir} is not an existing directory"
+    cd ${dest_dir}
+    wget ${url} -N || fail_with_message "Couldn't get files from ${url}"
+    cd $OLDPWD
+}
+
+extract_package() {
+    dest_dir=${1}
+    tarball=${2}
+
+    [ -d ${dest_dir} ] || fail_with_message "${dest_dir} does not exist or is not a directory"
+    [ -e ${tarball} ] || fail_with_message "${tarball} does not exist"
+
+    cd ${dest_dir}
+
+    # Get the extracted directory name
+    extracted_dir=$(tar -tzf ${tarball} | head -1 | cut -f1 -d"/") || fail_with_message "Couldn't get extracted dir name with tar"
+    tar -xzf ${tarball} --skip-old-files || fail_with_message "Couldn't extract files from tarball ${tarball}"
+    [ -d ${extracted_dir} ] || fail_with_message "The (supposedly) extracted directory ${extracted_dir} does not exist or is not a directory"
+    
+    cd $OLDPWD
+    echo ${extracted_dir}
 }
 
 configure_install() {
-    echo_with_lines "Configuring and installing Score-P with ${1}"
-    mkdir -p build || { echo "Failed to create build dir"; exit 1; }
+    base_dir=${1}
+    config_str=${2}
+
+    [ -d ${base_dir} ] || fail_with_message "${base_dir} is not an existing directory"
+    cd ${base_dir}
+
+    mkdir -p build || fail_with_message "Failed to create build dir"
     cd build
-    ../configure ${1} || { echo "Failed to configure Score-P with ${1}"; exit 1; }
-    make -j 64 || { echo "Failed to make Score-P with ${1}"; exit 1; }
-    make install ||  { echo "Failed to install Score-P with ${1}"; exit 1; }
+    ../configure ${config_str} || fail_with_message "Failed to configure Score-P with ${config_str}"
+    make -j 64 || fail_with_message "Failed to make Score-P with ${config_str}"
+    make install || fail_with_message "Failed to install Score-P with ${config_str}"
+    cd $OLDPWD
 }
 
-found_path=""
 find_path_of() {
-    echo_with_lines "Attempting to find path of ${1} from ${2}"
-
     # This gawk function assumes we're given a string that contains paths separated by ':'
     # E.g. "/some/path:/another/path:/a/third/path/with/the/patter/and/subdirs"
     # It'll first split the string by the path separator ':'
@@ -98,13 +130,28 @@ find_path_of() {
             }
         }'
     )
-    echo_with_lines "Using ${found_path} as path for ${1}"
+
+    [ -d ${found_path} ] || fail_with_message "Couldn't find path for ${1} from ${2}"
+
+    echo ${found_path}
 }
 
-module_str=""
-load_modules_and_generate_module_string() {
+load_modules() {
     [ ${#module_names[@]} == ${#module_versions[@]} ] ||
-        { echo "Module names and module versions are different lengths"; exit 1; }
+        fail_with_message "Module names and module versions are different lengths"
+
+    for ((i = 0; i < ${#module_names[@]}; i++))
+    do
+        module_name=${module_names[i]}
+        module_version=${module_versions[i]}
+        echo "Loading module ${module_name}/${module_version}"
+        ml "${module_name}/${module_version}" || fail_with_message "Couldn't load module ${module_name}/${module_version}"
+    done
+}
+
+generate_module_string() {
+    [ ${#module_names[@]} == ${#module_versions[@]} ] ||
+        fail_with_message "Module names and module versions are different lengths"
 
     for ((i = 0; i < ${#module_names[@]}; i++))
     do
@@ -113,55 +160,67 @@ load_modules_and_generate_module_string() {
         module_name=${module_names[i]}
         module_version=${module_versions[i]}
         module_str="${module_str:+${module_str}-}${module_name}-${module_version}"
-        echo "Loading module ${module_name}/${module_version}"
-        ml "${module_name}/${module_version}"
     done
+
+    echo ${module_str}
 }
 
+# =============================
+# Begin execution of the script
+# =============================
+
 echo_with_lines "This script downloads and installs Score-P. It's configured to work on Mahti. Last update on $modification_date"
+
+[ $# -eq 3 ] || {
+    echoerr "Usage: ${0} /path/to/build/dir /path/to/install/dir scorep-version";
+    fail_with_message "E.g. ${0} /scratch/project_2002078/apps /projappl/project_2002078/apps 8.4";
+}
+[ -d "${1}" ] || fail_with_message "${1} is not an existing directory"
+[ -d "${2}" ] || fail_with_message "${2} is not an existing directory"
+
 version_number_regexp='^[0-9]+([.][0-9]+)*$'
-
-([ $# -eq 2 ] && \
-    [ -d "${1}" ] && \
-    [[ "${2}" =~ ${version_number_regexp} ]]) || \
-    { echo "Usage: ${0} /path/to/install/dir scorep-version"; \
-        echo "E.g. \"${0} /projappl/project_2002078/apps 8.4\"";
-        exit 1; }
-
-base_dir=$(realpath ${1})/scorep
-mkdir -p ${base_dir}
-cd ${base_dir}
+[[ "${3}" =~ ${version_number_regexp} ]] || fail_with_message "${3} is not a valid version number"
 
 echo_with_lines "Load modules and generate directory name"
-load_modules_and_generate_module_string
+load_modules || fail_with_message "Failed to load modules"
+module_str=$(generate_module_string) || fail_with_message "Failed to generate module string"
 
-echo_with_lines "Downloading and extracting Score-P"
-scorep_version=${2}
-scorep_dir=${base_dir}/scorep_${scorep_version}-${module_str}
-echo "Using ${scorep_dir} as the installation directory"
+echo_with_lines "Create build and install directories"
+scorep_version=${3}
 scorep_tarball=scorep-${scorep_version}.tar.gz
 scorep_url=https://perftools.pages.jsc.fz-juelich.de/cicd/scorep/tags/scorep-${scorep_version}/${scorep_tarball}
-download_and_extract ${scorep_dir} ${scorep_tarball} ${scorep_url}
+
+build_dir=$(realpath ${1})/scorep
+mkdir -p ${build_dir} || fail_with_message "Couldn't create directory ${build_dir}"
+
+install_dir=$(realpath ${2})/scorep/scorep-${scorep_version}-${module_str}
+mkdir -p ${install_dir} || fail_with_message "Couldn't create directory ${install_dir}"
+
+echo_with_lines "Downloading Score-P"
+download_package ${build_dir} ${scorep_url} || fail_with_message "Failed to donwload package from ${scorep_url}"
+
+echo_with_lines "Extracting Score-P"
+build_dir=${build_dir}/$(extract_package ${build_dir} ${scorep_tarball}) || fail_with_message "Failed to extract package from ${scorep_tarball}"
+echo "Using ${build_dir} as the build and ${install_dir} as the installation directory"
 
 echo_with_lines "Configuring and installing Score-P"
-cd ${scorep_dir}
-find_path_of "papi" "${LIBRARY_PATH}"
+papi_path=$(find_path_of "papi" ${LIBRARY_PATH}) || fail_with_message "Failed to find papi path from ${LIBRARY_PATH}"
 
 # Add Score-P configuration options for different configurations
 declare -a config_options
 config_options=(
     "--with-nocross-compiler-suite=${compiler}"
     "--with-mpi=${mpi}"
-    "--with-papi-headers=${found_path}/include --with-papi-lib=${found_path}/lib"
-    "--with-libbfd=download"
+    "--with-papi-headers=${papi_path}/include --with-papi-lib=${papi_path}/lib"
+    "--with-libbfd=${binutils_path}"
 )
-config_str="--prefix=${scorep_dir}"
+config_str="--prefix=${install_dir}"
 
 for ((i = 0; i < ${#config_options[@]}; i++))
 do
     config_str="${config_str} ${config_options[i]}"
 done
 
-configure_install "${config_str}"
+configure_install ${build_dir} "${config_str}"
 
 echo_with_lines "Score-P installation successful!"
