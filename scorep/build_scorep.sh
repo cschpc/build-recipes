@@ -69,9 +69,8 @@ extract_package() {
     tarball=${2}
 
     [ -d ${dest_dir} ] || fail_with_message "${dest_dir} does not exist or is not a directory"
-    [ -e ${tarball} ] || fail_with_message "${tarball} does not exist"
-
     cd ${dest_dir}
+    [ -e ${tarball} ] || fail_with_message "${tarball} does not exist"
 
     # Get the extracted directory name
     extracted_dir=$(tar -tzf ${tarball} | head -1 | cut -f1 -d"/") || fail_with_message "Couldn't get extracted dir name with tar"
