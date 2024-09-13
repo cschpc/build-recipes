@@ -1,6 +1,6 @@
 #!/bin/bash
 
-modification_date=2024-09-10
+modification_date=2024-09-13
 authors="Juhana Lankinen, "
 
 # Choose:
@@ -10,6 +10,8 @@ authors="Juhana Lankinen, "
 compiler="gcc"
 mpi="openmpi"
 binutils_path="/appl/spack/v020/install-tree/gcc-8.5.0/binutils-2.40-nt5ao6/"
+# Set this to empty string to not use cuda
+cuda="cuda"
 
 # List loaded modules and their versions
 declare -a module_names
@@ -22,9 +24,16 @@ module_names=(
 declare -a module_versions
 module_versions=(
     "13.1.0"
-    "4.1.5"
+    "4.1.5${cuda:+-${cuda}}"
     "7.1.0"
 )
+
+# Add cuda to modules, if ${cuda} is not empty
+if [ "z${cuda}" != "z" ]
+then
+    module_names[${#module_names[@]}]="${cuda}"
+    module_versions[${#module_versions[@]}]="12.1.1"
+fi
 
 # ===================================
 # Function definitions for the script
@@ -206,6 +215,11 @@ echo "Using ${build_dir} as the build and ${install_dir} as the installation dir
 echo_with_lines "Configuring and installing Score-P"
 papi_path=$(find_path_of "papi" ${LIBRARY_PATH}) || fail_with_message "Failed to find papi path from ${LIBRARY_PATH}"
 
+if [ "z${cuda}" != "z" ]
+then
+    cuda_path=$(find_path_of "${cuda}" ${LIBRARY_PATH}) || fail_with_message "Failed to find ${cuda} path from ${LIBRARY_PATH}"
+fi
+
 # Add Score-P configuration options for different configurations
 declare -a config_options
 config_options=(
@@ -213,7 +227,19 @@ config_options=(
     "--with-mpi=${mpi}"
     "--with-papi-headers=${papi_path}/include --with-papi-lib=${papi_path}/lib"
     "--with-libbfd=${binutils_path}"
+    "--without-cubew"
+    "--without-cubelib"
 )
+
+# Add cuda specific options
+if [ "z${cuda_path}" != "z" ]
+then
+    config_options[${#config_options[@]}]="--with-libcudart-include=${cuda_path}/include"
+    config_options[${#config_options[@]}]="--with-libcudart-lib=${cuda_path}/lib64"
+    config_options[${#config_options[@]}]="--with-libcupti-include=${cuda_path}/extras/CUPTI/include"
+    config_options[${#config_options[@]}]="--with-libcupti-lib=${cuda_path}/extras/CUPTI/lib64"
+fi
+
 config_str="--prefix=${install_dir}"
 
 for ((i = 0; i < ${#config_options[@]}; i++))
