@@ -1,6 +1,6 @@
 #!/bin/bash
 
-modification_date=2024-09-13
+modification_date=2024-09-16
 authors="Juhana Lankinen, "
 
 # Choose:
@@ -181,7 +181,7 @@ echo_with_lines "This script downloads and installs Score-P. It's configured to 
 
 [ $# -eq 3 ] || {
     echoerr "Usage: ${0} /path/to/build/dir /path/to/install/dir scorep-version";
-    fail_with_message "E.g. ${0} /scratch/project_2002078/apps /projappl/project_2002078/apps 8.4";
+    fail_with_message "E.g. ${0} ${TMPDIR}/apps /projappl/project_2002078/apps 8.4";
 }
 [ -d "${1}" ] || fail_with_message "${1} is not an existing directory"
 [ -d "${2}" ] || fail_with_message "${2} is not an existing directory"
