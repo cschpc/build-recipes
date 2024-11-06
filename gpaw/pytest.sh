@@ -3,9 +3,9 @@
 host=$(hostname)
 
 if [[ $host == puhti* ]]; then
-    partition=small
+    sbatch_args="-p small --mem-per-cpu=4G"
 elif [[ $host == mahti* ]]; then
-    partition=medium
+    sbatch_args="-p medium --mem=0"
 fi
 
 # Test target
@@ -58,7 +58,7 @@ else
     pushd $run_dir
     echo "run dir: $run_dir"
     cp -r $test_dir ./
-    srun -J $name -t 01:00:00 -p $partition -N 1 -n 1 --cpus-per-task=1 --mem-per-cpu=4G pytest -v --disable-pytest-warnings -o cache_dir=$cache_dir test/test_generate_gpwfiles.py | tee slurm.out
+    srun -J $name -t 01:00:00 -N 1 -n 1 --cpus-per-task=1 $sbatch_args pytest -v --disable-pytest-warnings -o cache_dir=$cache_dir test/test_generate_gpwfiles.py | tee slurm.out
     popd
 fi
 
@@ -81,7 +81,7 @@ function submit_job {
     cp -r $test_dir ./
     mkdir -p $cache_dir/d
     cp -r $gpw_files $cache_dir/d/
-    sbatch -J $name -o slurm.out -t 04:00:00 -p $partition -N 1 -n $n --cpus-per-task=1 --mem-per-cpu=4G --wrap="gpaw info; srun $cmd --disable-pytest-warnings -o cache_dir=$cache_dir test/"
+    sbatch -J $name -o slurm.out -t 04:00:00 -N 1 -n $n --cpus-per-task=1 $sbatch_args --wrap="gpaw info; srun $cmd --disable-pytest-warnings -o cache_dir=$cache_dir test/"
     popd
 }
 
