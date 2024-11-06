@@ -47,6 +47,7 @@ echo "--------------------------------------------------------------------------
 name=gpaw_pytest_gpw
 run_dir=$root_dir/$name
 cache_dir=$run_dir/pytest_cache
+tmp_dir=$run_dir/pytest_tmp
 gpw_files=$cache_dir/d/gpaw_test_gpwfiles
 echo "gpw files: $gpw_files"
 if [ -d "$gpw_files" ]; then
@@ -58,7 +59,7 @@ else
     pushd $run_dir
     echo "run dir: $run_dir"
     cp -r $test_dir ./
-    srun -J $name -t 01:00:00 -N 1 -n 1 --cpus-per-task=1 $sbatch_args pytest -v --disable-pytest-warnings -o cache_dir=$cache_dir test/test_generate_gpwfiles.py | tee slurm.out
+    srun -J $name -t 01:00:00 -N 1 -n 1 --cpus-per-task=1 $sbatch_args pytest -v --disable-pytest-warnings -o cache_dir=$cache_dir --basetemp=$tmp_dir test/test_generate_gpwfiles.py | tee slurm.out
     popd
 fi
 
@@ -73,6 +74,7 @@ function submit_job {
     cmd="$3"
     run_dir=$root_dir/$name
     cache_dir=$run_dir/pytest_cache
+    tmp_dir=$run_dir/pytest_tmp
 
     rm -rf $run_dir
     mkdir -p $run_dir
@@ -81,7 +83,7 @@ function submit_job {
     cp -r $test_dir ./
     mkdir -p $cache_dir/d
     cp -r $gpw_files $cache_dir/d/
-    sbatch -J $name -o slurm.out -t 04:00:00 -N 1 -n $n --cpus-per-task=1 $sbatch_args --wrap="gpaw info; srun $cmd --disable-pytest-warnings -o cache_dir=$cache_dir test/"
+    sbatch -J $name -o slurm.out -t 04:00:00 -N 1 -n $n --cpus-per-task=1 $sbatch_args --wrap="gpaw info; srun $cmd --disable-pytest-warnings -o cache_dir=$cache_dir --basetemp=$tmp_dir test/; rm -r $tmp_dir $cache_dir test/"
     popd
 }
 
