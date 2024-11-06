@@ -1,24 +1,34 @@
 #!/bin/bash
 
-version=${1:-24.1.0-omp}
+# Mahti
+partition=medium
+
+# Puhti
+partition=small
+
+# Test target
+tgt=gpaw_test_3
 
 
 echo "--------------------------------------------------------------------------------"
 echo "- Load GPAW module"
 echo "--------------------------------------------------------------------------------"
-#module purge
-module use $HOME/gpaw_test_1/modulefiles/
-module load my-gpaw/$version
-# module load gpaw/$version
+module purge
+module use $PWD/$tgt/modulefiles/
+module load my-gpaw
 gpaw info
 
 
 echo "--------------------------------------------------------------------------------"
 echo "- Install pytest"
 echo "--------------------------------------------------------------------------------"
-export PYTHONUSERBASE=$HOME/tmp/test_gpaw_pytest
+export PYTHONUSERBASE=$PWD/tmp/${tgt}_pythonuserbase
 export PATH=$PATH:$PYTHONUSERBASE/bin
-python3 -m pip install --user pytest
+if [ -d "$PYTHONUSERBASE/bin" ]; then
+    echo "exists; skipping"
+else
+    python3 -m pip install --user pytest
+fi
 
 
 echo "--------------------------------------------------------------------------------"
@@ -26,7 +36,7 @@ echo "- Set paths"
 echo "--------------------------------------------------------------------------------"
 test_dir=$(gpaw info | grep '| gpaw' | awk '{print $3}')/test
 echo "GPAW test files: $test_dir"
-root_dir=$HOME/tmp/test_gpaw_run_pytest
+root_dir=$PWD/tmp/${tgt}_pytest_runs
 echo "root directory for tests: $root_dir"
 
 
@@ -47,7 +57,7 @@ else
     pushd $run_dir
     echo "run dir: $run_dir"
     cp -r $test_dir ./
-    srun -J $name -t 01:00:00 -p medium -N 1 -n 1 --cpus-per-task=1 --mem=0 pytest -v -o cache_dir=$cache_dir test/test_generate_gpwfiles.py | tee slurm.out
+    srun -J $name -t 01:00:00 -p $partition -N 1 -n 1 --cpus-per-task=1 --mem-per-cpu=4G pytest -v --disable-pytest-warnings -o cache_dir=$cache_dir test/test_generate_gpwfiles.py | tee slurm.out
     popd
 fi
 
@@ -70,7 +80,7 @@ function submit_job {
     cp -r $test_dir ./
     mkdir -p $cache_dir/d
     cp -r $gpw_files $cache_dir/d/
-    sbatch -J $name -o slurm.out -t 04:00:00 -p medium -N 1 -n $n --cpus-per-task=1 --mem=0 --wrap="gpaw info; srun $cmd -o cache_dir=$cache_dir test/"
+    sbatch -J $name -o slurm.out -t 04:00:00 -p $partition -N 1 -n $n --cpus-per-task=1 --mem-per-cpu=4G --wrap="gpaw info; srun $cmd --disable-pytest-warnings -o cache_dir=$cache_dir test/"
     popd
 }
 
@@ -80,19 +90,3 @@ for n in 1 2 4 8; do
     submit_job "gpaw_pytest_n$n-gp" "$n" "gpaw-python -m pytest -v"
 done
 
-
-echo "--------------------------------------------------------------------------------"
-echo "- Load new ASE"
-echo "--------------------------------------------------------------------------------"
-module load ase/.master-2023-09-28-53987ebbdf
-gpaw info
-
-
-echo "--------------------------------------------------------------------------------"
-echo "- Submit tests with new ASE"
-echo "--------------------------------------------------------------------------------"
-
-for n in 1 2 4 8; do
-    submit_job "gpaw_pytest_n$n-newase" "$n" "pytest -v"
-    submit_job "gpaw_pytest_n$n-gp-newase" "$n" "gpaw-python -m pytest -v"
-done
