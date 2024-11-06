@@ -17,13 +17,13 @@ extra_link_args = ['-fopenmp']
 # blas
 libraries += ['openblas']
 
-# fftw
-fftw = True
-libraries += ['fftw3']
-
 # scalapack
 scalapack = True
 libraries += ['scalapack']
+
+# fftw
+fftw = True
+libraries += ['fftw3']
 
 # libxc
 libraries += ['xc']
