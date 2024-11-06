@@ -9,8 +9,8 @@ module purge
 
 main_dir=$PWD
 
-ase_version=3.22.1
-gpaw_version=24.1.0
+ase_version=3.23.0
+gpaw_version=24.6.0
 gpaw_git_version=${gpaw_version}
 #openmp=""
 openmp="-omp"
@@ -24,20 +24,21 @@ version=$gpaw_version-gcc-openblas$openmp
 #install_tgt=/appl/soft/phys/gpaw/$version
 #module_base=/appl/modulefiles/gpaw
 # Testing
-install_tgt=$HOME/gpaw_test_1/gpaw/$version
-module_base=$HOME/gpaw_test_1/modulefiles/my-gpaw
+install_tgt=$PWD/gpaw_test_3/gpaw/$version
+module_base=$PWD/gpaw_test_3/modulefiles/my-gpaw
+echo "install_tgt=$install_tgt"
+echo "module_base=$module_base"
 
 module_version=${gpaw_version}${openmp}
-
-tmp=$TMPDIR/gpaw_build
-tmp_gpaw_git=$tmp/gpaw
-
-rm -rf $tmp
-trap "rm -rf $tmp" EXIT
 
 rm -rf $install_tgt
 mkdir -p $install_tgt
 mkdir -p $module_base
+
+# tmp=$TMPDIR/gpaw_build
+# tmp_gpaw_git=$tmp/gpaw
+# rm -rf $tmp
+# trap "rm -rf $tmp" EXIT
 
 spack_view=/appl/spack/v017/views/gpaw-python3.9
 python=$spack_view/bin/python3.9
@@ -54,14 +55,15 @@ else
 fi
 
 # Install ASE for GPAW build (for writing git hash)
-$python -m pip install --prefix $install_tgt ase==$ase_version
+$python -m pip install -v --no-build-isolation --prefix $install_tgt ase==$ase_version
 export PYTHONPATH=$install_tgt/lib/python3.9/site-packages:$PYTHONPATH
 
-git clone https://gitlab.com/gpaw/gpaw.git $tmp_gpaw_git
-pushd $tmp_gpaw_git
-git checkout $gpaw_git_version
-$python -m pip install --verbose --prefix $install_tgt . 2>&1 | tee $install_tgt/build-gpaw-$version.log
-popd
+$python -m pip install -v --log $install_tgt/build.log --no-build-isolation --prefix $install_tgt gpaw==$gpaw_version
+# git clone https://gitlab.com/gpaw/gpaw.git $tmp_gpaw_git
+# pushd $tmp_gpaw_git
+# git checkout $gpaw_git_version
+# $python -m pip install --verbose --prefix $install_tgt . 2>&1 | tee $install_tgt/build-gpaw-$version.log
+# popd
 
 # Install pytest: don't do it! Otherwise pytest prepends this path to sys.path when run -> big mess with other modules!
 # $python -m pip install --prefix $install_tgt pytest
@@ -83,27 +85,15 @@ local version = '$version'
 
 if (mode() == "load") then
   LmodMessage("GPAW version " .. gpaw_version .. " is now in use")
-  LmodMessage("Release notes: https://wiki.fysik.dtu.dk/gpaw/releasenotes.html")
-  LmodMessage("")
+  LmodMessage("Release notes: https://gpaw.readthedocs.io/releasenotes.html")
   LmodMessage("This module comes with the stable ASE version $ase_version.")
-  LmodMessage("")
-  LmodMessage("To install the latest ASE development version for testing:")
-  LmodMessage("1. Fetch the ASE code (only once):")
-  LmodMessage("     git clone https://gitlab.com/ase/ase.git \$HOME/my_ase")
-  LmodMessage("     # Checkout the desired development version (commit hash):")
-  LmodMessage("     cd \$HOME/my_ase && git checkout <commit hash>")
-  LmodMessage("2. Activate this custom ASE (every time after loading gpaw module):")
-  LmodMessage("     export PYTHONPATH=\$HOME/my_ase:\$PYTHONPATH")
-  LmodMessage("3. Check that the correct versions are used:")
-  LmodMessage("     gpaw info")
-  LmodMessage("")
 end
 
 help('GPAW environment ' .. version)
 
 whatis('Version: ' .. version)
 whatis('Description: GPAW density-functional theory software package')
-whatis('URL: https://wiki.fysik.dtu.dk/gpaw')
+whatis('URL: https://gpaw.readthedocs.io')
 
 depends_on($depend_clause)
 
