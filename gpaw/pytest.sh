@@ -1,14 +1,15 @@
 #!/bin/bash
 
-# Mahti
-partition=medium
+host=$(hostname)
 
-# Puhti
-partition=small
+if [[ $host == puhti* ]]; then
+    partition=small
+elif [[ $host == mahti* ]]; then
+    partition=medium
+fi
 
 # Test target
 tgt=gpaw_test_3
-
 
 echo "--------------------------------------------------------------------------------"
 echo "- Load GPAW module"
