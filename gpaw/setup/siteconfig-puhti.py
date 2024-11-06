@@ -1,32 +1,36 @@
-# Custom GPAW setup for Puhti (Bull Sequana X1000)
-import os
 parallel_python_interpreter = True
 
-# compiler and linker
-compiler = './gcc.py'
-mpicompiler = './gcc.py'
-mpilinker = 'mpicc'
-extra_compile_args = ['-std=c99', '-O3', '-fopenmp-simd']
+mpi = True
+compiler = 'mpicc'
+libraries = []
+library_dirs = []
+include_dirs = []
+extra_compile_args = [
+    '-O3',
+    '-march=native',
+    '-mtune=native',
+    '-fopenmp',  # implies -fopenmp-simd
+    ]
 extra_link_args = ['-fopenmp']
 
-# libraries
-libraries = ['z']
+# MKL
+libraries += ['mkl_core', 'mkl_gnu_thread', 'mkl_intel_lp64']
+
+# scalapack
+scalapack = True
+libraries += ['mkl_scalapack_lp64', 'mkl_blacs_openmpi_lp64']
+
+# fftw
+fftw = True
+libraries += ['fftw3']
 
 # libxc
-library_dirs += [os.environ['LIBXCDIR'] + '/lib']
-include_dirs += [os.environ['LIBXCDIR'] + '/include']
 libraries += ['xc']
+dpath = '/appl/spack/v018/install-tree/gcc-11.3.0/libxc-5.1.7-4aszho'
+include_dirs += [f'{dpath}/include']
+library_dirs += [f'{dpath}/lib']
+extra_link_args += [f'-Wl,-rpath,{dpath}/lib']
 
-# MKL
-libraries += ['mkl_intel_lp64' ,'mkl_sequential', 'mkl_core']
+define_macros += [('GPAW_ASYNC', 1)]
+define_macros += [('GPAW_MPI2', 1)]
 
-# ScaLAPACK
-scalapack = True
-if scalapack:
-    mpi_libraries += ['mkl_scalapack_lp64', 'mkl_blacs_openmpi_lp64']
-
-# GPAW defines
-define_macros += [('GPAW_NO_UNDERSCORE_CBLACS', '1')]
-define_macros += [('GPAW_NO_UNDERSCORE_CSCALAPACK', '1')]
-define_macros += [("GPAW_ASYNC",1)]
-define_macros += [("GPAW_MPI2",1)]
