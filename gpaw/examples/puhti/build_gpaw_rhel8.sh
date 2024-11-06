@@ -26,14 +26,29 @@ version=$gpaw_version-gcc-mkl$openmp
 # Testing
 install_tgt=$PWD/gpaw_test_3/gpaw/$version
 module_base=$PWD/gpaw_test_3/modulefiles/my-gpaw
+
 echo "install_tgt=$install_tgt"
 echo "module_base=$module_base"
-
 module_version=${gpaw_version}${openmp}
+module_file=${module_base}/${module_version}.lua
+echo "module_file=$module_file"
 
-rm -rf $install_tgt
+if [[ -e "$install_tgt" ]]; then
+    echo "ERROR: install_tgt exists"
+    exit 1
+fi
+if [[ -e "$module_file" ]]; then
+    echo "ERROR: module_file exists"
+    exit 1
+fi
+
 mkdir -p $install_tgt
-mkdir -p $module_base
+if [[ ! -e "$module_base" ]]; then
+    echo "create module_base"
+    mkdir -p $module_base
+    chmod g=u $module_base
+    chmod o+rX $module_base
+fi
 
 # tmp=$TMPDIR/gpaw_build
 # tmp_gpaw_git=$tmp/gpaw
@@ -77,7 +92,7 @@ done
 # remove trailing comma
 depend_clause=${depend_clause:0:-2}
 
-cat > ${module_base}/${module_version}.lua <<EOF
+cat > $module_file <<EOF
 -- GPAW module file
 
 local gpaw_version = '$gpaw_version'
@@ -116,5 +131,5 @@ EOF
 # fix permissions
 chmod -R g=u $install_tgt
 chmod -R o+rX $install_tgt
-chmod -R g=u $module_base
-chmod -R o+rX $module_base
+chmod g=u $module_file
+chmod o+rX $module_file
