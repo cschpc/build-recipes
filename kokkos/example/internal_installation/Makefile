@@ -1,51 +1,48 @@
 MAKEFLAGS += --silent
 
+this_file := $(lastword $(MAKEFILE_LIST))
+
 project_name:=kokkos-example
 root_dir:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 source_dir:=$(root_dir)
 build_dir_prefix:=$(root_dir)/build
 
-.PHONY: hip openmp
+build_type=Release
+build_dir=$(build_dir_prefix)/$(build_type)
+common_args=-B $(build_dir) \
+	    -S $(source_dir) \
+	    -DCMAKE_BUILD_TYPE:STRING=$(build_type) \
+	    -Dproject_name=$(project_name) \
+	    -DCMAKE_INSTALL_PREFIX=$(root_dir) \
+	    -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
+
+.PHONY: hip openmp clean build
 
 .ONESHELL:
 hip:
-	build_type=Release
-	build_dir=$(build_dir_prefix)/$${build_type}
 	cmake \
-		-B $${build_dir} \
-		-S $(source_dir) \
-		-DCMAKE_BUILD_TYPE:STRING=$${build_type} \
-		-Dproject_name=$(project_name) \
+		$(common_args) \
 		-DCMAKE_CXX_COMPILER=hipcc \
-		-DCMAKE_BUILD_TYPE=Release \
 		-DKokkos_ENABLE_HIP=ON \
 		-DKokkos_ARCH_AMD_GFX90A=ON \
-		-DKokkos_ENABLE_OPENMP=ON \
-		-DCMAKE_INSTALL_PREFIX=$(root_dir) \
-		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-	cmake \
-		--build $${build_dir} \
-		--target install \
-		-j8
+		-DKokkos_ENABLE_OPENMP=ON
+
+	$(MAKE) -f $(this_file) build
 
 .ONESHELL:
 openmp:
-	build_type=Release
-	build_dir=$(build_dir_prefix)/$${build_type}
 	cmake \
-		-B $${build_dir} \
-		-S $(source_dir) \
-		-DCMAKE_BUILD_TYPE:STRING=$${build_type} \
-		-Dproject_name=$(project_name) \
+		$(common_args) \
 		-DCMAKE_CXX_COMPILER=g++ \
-		-DCMAKE_BUILD_TYPE=Release \
-		-DKokkos_ENABLE_OPENMP=ON \
-		-DCMAKE_INSTALL_PREFIX=$(root_dir)
-		-DCMAKE_EXPORT_COMPILE_COMMANDS=ON
-	cmake \
-		--build $${build_dir} \
-		--target install \
-		-j8
+		-DKokkos_ENABLE_OPENMP=ON
+
+	$(MAKE) -f $(this_file) build
 
 clean:
 	rm -rf $(build_dir_prefix) $(project_name)
+
+build:
+	cmake \
+		--build $(build_dir) \
+		--target install \
+		-j8
