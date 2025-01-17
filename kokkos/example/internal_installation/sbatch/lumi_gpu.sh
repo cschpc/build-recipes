@@ -9,7 +9,7 @@
 
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
 #export MPICH_GPU_SUPPORT_ENABLED=1
-OMP_PROC_BIND=spread
-OMP_PLACES=threads
+export OMP_PROC_BIND=spread
+export OMP_PLACES=threads
 
 srun kokkos-example/v0.1.0.0/Release/bin/kokkos-example-cli

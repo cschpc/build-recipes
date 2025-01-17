@@ -25,9 +25,11 @@ target_include_directories(${objs} PRIVATE
     "${CMAKE_CURRENT_LIST_DIR}"
 )
 
+target_link_libraries(${objs} PUBLIC
+    Kokkos::kokkos
+)
 target_link_libraries(${static_library} PUBLIC
     ${objs}
-    Kokkos::kokkos
 )
 target_link_libraries(${binary} PRIVATE
     ${static_library}

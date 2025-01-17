@@ -1,4 +1,5 @@
 MAKEFLAGS += --silent
+.SHELLFLAGS = -ec
 
 this_file := $(lastword $(MAKEFILE_LIST))
 
@@ -16,7 +17,17 @@ common_args=-B $(build_dir) \
 	    -DCMAKE_INSTALL_PREFIX=$(root_dir) \
 	    -DCMAKE_EXPORT_COMPILE_COMMANDS=ON
 
-.PHONY: hip openmp clean build
+.PHONY: cuda hip openmp clean build
+
+.ONESHELL:
+cuda:
+	cmake \
+		$(common_args) \
+		-DKokkos_ENABLE_CUDA=ON \
+		-DKokkos_ARCH_AMPERE80=ON \
+		-DKokkos_ENABLE_OPENMP=ON
+
+	$(MAKE) -f $(this_file) build
 
 .ONESHELL:
 hip:
