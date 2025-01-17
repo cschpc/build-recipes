@@ -52,8 +52,11 @@ openmp:
 clean:
 	rm -rf $(build_dir_prefix) $(project_name)
 
+.ONESHELL:
 build:
 	cmake \
 		--build $(build_dir) \
 		--target install \
 		-j8
+
+	ln -s $(build_dir)/compile_commands.json compile_commands.json
