@@ -59,4 +59,4 @@ build:
 		--target install \
 		-j8
 
-	ln -s $(build_dir)/compile_commands.json compile_commands.json
+	ln -fs $(build_dir)/compile_commands.json compile_commands.json

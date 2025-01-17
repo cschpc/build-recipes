@@ -9,7 +9,6 @@
 #SBATCH --account=project_2002078
 
 export OMP_NUM_THREADS=$SLURM_CPUS_PER_TASK
-#export MPICH_GPU_SUPPORT_ENABLED=1
 export OMP_PROC_BIND=spread
 export OMP_PLACES=threads
 

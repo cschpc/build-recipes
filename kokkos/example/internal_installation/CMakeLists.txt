@@ -24,14 +24,17 @@ set(debug_gcc "$<AND:$<CONFIG:Debug>,${gcc}>")
 
 set(gcc_warn -Wall;-Werror;-Wextra;-Wconversion;-Wsign-conversion;)
 set(gcc_warn ${gcc_warn};-pedantic-errors;-Wcast-qual;-Wwrite-strings;)
-set(gcc_warn ${gcc_warn};-Wcast-align=strict;-Wparentheses;)
-set(gcc_warn ${gcc_warn};-Wlogical-op;-Wlogical-not-parentheses;)
+set(gcc_warn ${gcc_warn};-Wparentheses;)
+set(gcc_warn ${gcc_warn};-Wlogical-not-parentheses;)
 set(gcc_warn ${gcc_warn};-Wredundant-decls;-Wformat=2;)
 set(gcc_warn ${gcc_warn};-Wformat-security;-Wformat-nonliteral;)
 set(gcc_warn ${gcc_warn};-Wnull-dereference;-Winit-self;-Wuninitialized;)
-set(gcc_warn ${gcc_warn};-Warith-conversion;-Wduplicated-branches;)
 set(gcc_warn ${gcc_warn};-Wpointer-arith;-Wundef;)
-set(gcc_warn ${gcc_warn};-Wduplicated-cond;-Wformat-signedness;)
+
+# These seem not to be recognized by hipcc
+#set(gcc_warn ${gcc_warn};-Wlogical-op;-Wcast-align=strict;)
+#set(gcc_warn ${gcc_warn};-Warith-conversion;-Wduplicated-branches;)
+#set(gcc_warn ${gcc_warn};-Wduplicated-cond;-Wformat-signedness;)
 
 set(gcc_deb_opt -Og;)
 set(gcc_rel_opt -O3;)
