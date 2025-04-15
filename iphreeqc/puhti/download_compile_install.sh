@@ -14,7 +14,7 @@ mkdir -p $prefix/Release
 mkdir -p $prefix/RelWithDebInfo
 
 # Release
-./configure CC=gcc CXX=g++ --prefix=$prefix/Release
+./configure CC=gcc CXX=g++ CLAGS=-fno-omit-frame-pointer ---prefix=$prefix/Release
 make -j 12
 make install
 
@@ -22,6 +22,6 @@ make clean
 make distclean
 
 # Release with debug info
-./configure CC=gcc CXX=g++ CLAGS=-g --prefix=$prefix/RelWithDebInfo
+./configure CC=gcc CXX=g++ CLAGS='-g -fno-omit-frame-pointer' --prefix=$prefix/RelWithDebInfo
 make -j 12
 make install
