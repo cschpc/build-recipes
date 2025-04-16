@@ -1,8 +1,8 @@
 # target directory for installation
-# modified on 15.4.2025
+# modified on 16.4.2025
 
 version=3.13.3
-tgt=/projappl/project_462000007/python/${version}-perf
+tgt=/projappl/project_462000007/apps/python/${version}-perf
 
 mkdir -p ${tgt}
 
