@@ -11,10 +11,12 @@ lib_prefix=/appl/lumi/SW/LUMI-24.03/C/EB
 gdbm=${lib_prefix}/gdbm/1.23-cpeCray-24.03
 ffi=${lib_prefix}/libffi/3.4.4-cpeCray-24.03
 sqlite=${lib_prefix}/SQLite/3.43.1-cpeCray-24.03
+valgrind=/opt/cray/pe/valgrind4hpc/2.13.2
 
 export LD_LIBRARY_PATH="${gdbm}/lib64:${LD_LIBRARY_PATH}"
 export LD_LIBRARY_PATH="${ffi}/lib64:${LD_LIBRARY_PATH}"
 export LD_LIBRARY_PATH="${sqlite}/lib64:${LD_LIBRARY_PATH}"
+export LD_LIBRARY_PATH="${valgrind}/lib:${LD_LIBRARY_PATH}"
 
 export OMP_NUM_THREADS=1
 

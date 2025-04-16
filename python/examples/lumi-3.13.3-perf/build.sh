@@ -22,7 +22,6 @@ git checkout v${version}
 
 # setup build environment
 ml PrgEnv-cray
-ml valgrind4hpc
 
 lib_prefix=/appl/lumi/SW/LUMI-24.03/C/EB
 gdbm=${lib_prefix}/gdbm/1.23-cpeCray-24.03
