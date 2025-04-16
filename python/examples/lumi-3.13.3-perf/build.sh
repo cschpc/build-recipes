@@ -6,7 +6,7 @@ tgt=/projappl/project_462000007/apps/python/${version}-perf
 
 mkdir -p ${tgt}
 
-build_dir=/flash/project_462000007/$USER
+build_dir=/flash/project_462000007/$USER/python-build
 mkdir -p $build_dir
 
 cd $build_dir
@@ -57,8 +57,8 @@ cd -
 cd ..
 
 # setup load script
-script_dir=$(dirname $0)
-sed -e "s|<BASE>|$tgt|g" ${script_dir}load.sh > $tgt/load.sh
+script_dir=$(dirname "$0")
+sed -e "s|<BASE>|$tgt|g" ${script_dir}/load.sh > $tgt/load.sh
 
 # install pip + wheel
 source $tgt/load.sh
