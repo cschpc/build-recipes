@@ -9,6 +9,7 @@ mkdir -p ${tgt}
 build_dir=/flash/project_462000007/$USER/python-build
 mkdir -p $build_dir
 
+script_dir=$(dirname -- "$(readlink -f -- "$0";)";)
 cd $build_dir
 
 # fetch source code
@@ -27,6 +28,7 @@ lib_prefix=/appl/lumi/SW/LUMI-24.03/C/EB
 gdbm=${lib_prefix}/gdbm/1.23-cpeCray-24.03
 ffi=${lib_prefix}/libffi/3.4.4-cpeCray-24.03
 sqlite=${lib_prefix}/SQLite/3.43.1-cpeCray-24.03
+valgrind=/opt/cray/pe/valgrind4hpc/2.13.2
 
 # perf likes -fno-omit-frame-pointer -mno-omit-leaf-frame-pointer
 # see: https://docs.python.org/3/howto/perf_profiling.html#how-to-obtain-the-best-results
@@ -37,14 +39,17 @@ export CXXFLAGS=$CFLAGS
 export CFLAGS="$CFLAGS -I${gdbm}/include"
 export CFLAGS="$CFLAGS -I${ffi}/include"
 export CFLAGS="$CFLAGS -I${sqlite}/include"
+export CFLAGS="$CFLAGS -I${valgrind}/include"
 
 export LDFLAGS="-L${gdbm}/lib64"
 export LDFLAGS="$LDFLAGS -L${ffi}/lib64"
 export LDFLAGS="$LDFLAGS -L${sqlite}/lib64 -lsqlite3"
+export LDFLAGS="$LDFLAGS -L${valgrind}/lib"
 
 export LD_LIBRARY_PATH="${gdbm}/lib64:${LD_LIBRARY_PATH}"
 export LD_LIBRARY_PATH="${ffi}/lib64:${LD_LIBRARY_PATH}"
 export LD_LIBRARY_PATH="${sqlite}/lib64:${LD_LIBRARY_PATH}"
+export LD_LIBRARY_PATH="${valgrind}/lib:${LD_LIBRARY_PATH}"
 
 set -xe
 
@@ -57,7 +62,6 @@ cd -
 cd ..
 
 # setup load script
-script_dir=$(dirname "$0")
 sed -e "s|<BASE>|$tgt|g" ${script_dir}/load.sh > $tgt/load.sh
 
 # install pip + wheel
