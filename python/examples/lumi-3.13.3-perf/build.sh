@@ -54,7 +54,7 @@ set -xe
 
 # build and install
 cd $build_dir
-$src/configure CC=cc CXX=CC FC=ftn --prefix=$tgt --disable-shared --disable-ipv6 --with-valgrind --with-dtrace --without-tkinter 2>&1 | tee loki-conf
+$src/configure CC=cc CXX=CC FC=ftn --prefix=$tgt --disable-shared --disable-ipv6 --with-valgrind --without-tkinter 2>&1 | tee loki-conf
 make -j 12 2>&1 | tee loki-make
 make install 2>&1 | tee loki-inst
 cd -
