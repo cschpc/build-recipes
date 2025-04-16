@@ -21,6 +21,7 @@ git checkout v${version}
 
 # setup build environment
 ml PrgEnv-cray
+ml valgrind4hpc
 
 lib_prefix=/appl/lumi/SW/LUMI-24.03/C/EB
 gdbm=${lib_prefix}/gdbm/1.23-cpeCray-24.03
@@ -57,8 +58,7 @@ cd ..
 
 # setup load script
 script_dir=$(dirname $0)
-cd ${script_dir}
-sed -e "s|<BASE>|$tgt|g" load.sh > $tgt/load.sh
+sed -e "s|<BASE>|$tgt|g" ${script_dir}load.sh > $tgt/load.sh
 
 # install pip + wheel
 source $tgt/load.sh
