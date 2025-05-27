@@ -9,8 +9,8 @@ module purge
 
 main_dir=$PWD
 
-ase_version=3.23.0
-gpaw_version=24.6.0
+ase_version=3.24.0
+gpaw_version=25.1.0
 gpaw_git_version=${gpaw_version}
 #openmp=""
 openmp="-omp"
