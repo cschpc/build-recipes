@@ -17,6 +17,9 @@ echo "--------------------------------------------------------------------------
 module purge
 module use $PWD/$tgt/modulefiles/
 module load my-gpaw
+
+module list
+
 gpaw info
 
 

@@ -9,11 +9,14 @@ module purge
 
 main_dir=$PWD
 
-ase_version=3.23.0
-gpaw_version=24.6.0
+ase_version=3.24.0
+gpaw_version=25.1.0
 gpaw_git_version=${gpaw_version}
 #openmp=""
 openmp="-omp"
+
+# FOR FUTURE REFERENCE: dependences in gcc/13.1.0 tree. But not usable currently because we don't have a working Python for it
+#modules=('gcc/13.1.0' 'openmpi/4.1.5' 'openblas/0.3.23-omp' 'fftw/3.3.10-mpi-omp' 'netlib-scalapack/2.2.0' 'libvdwxc/0.4.0')
 
 modules=('gcc/11.2.0' 'openmpi/4.1.2' 'openblas/0.3.18-omp' 'fftw/3.3.10-mpi' 'netlib-scalapack/2.1.0')
 module load ${modules[@]}
@@ -50,19 +53,21 @@ if [[ ! -e "$module_base" ]]; then
     chmod o+rX $module_base
 fi
 
-# tmp=$TMPDIR/gpaw_build
-# tmp_gpaw_git=$tmp/gpaw
-# rm -rf $tmp
+tmp=$TMPDIR/gpaw_build
+tmp_gpaw_git=$tmp/gpaw
+rm -rf $tmp
 # trap "rm -rf $tmp" EXIT
 
 spack_view=/appl/spack/v017/views/gpaw-python3.9
 python=$spack_view/bin/python3.9
 
+# Where to find siteconfig and patches
+setup_dir=$main_dir/examples/mahti/setup
 
 if [ -n "$openmp" ]
 then
-  #export GPAW_CONFIG=$main_dir/setup/siteconfig-mahti-omp-elpa.py
-  export GPAW_CONFIG=$main_dir/setup/siteconfig-mahti-omp.py
+  #export GPAW_CONFIG=$setup_dir/siteconfig-mahti-omp-elpa.py
+  export GPAW_CONFIG=$setup_dir/siteconfig-mahti-omp.py
 else
   echo "Not implemented. ELPA has only openmp.so?"
   exit 1
@@ -73,12 +78,18 @@ fi
 $python -m pip install -v --no-build-isolation --prefix $install_tgt ase==$ase_version
 export PYTHONPATH=$install_tgt/lib/python3.9/site-packages:$PYTHONPATH
 
-$python -m pip install -v --log $install_tgt/build.log --no-build-isolation --prefix $install_tgt gpaw==$gpaw_version
-# git clone https://gitlab.com/gpaw/gpaw.git $tmp_gpaw_git
-# pushd $tmp_gpaw_git
-# git checkout $gpaw_git_version
-# $python -m pip install --verbose --prefix $install_tgt . 2>&1 | tee $install_tgt/build-gpaw-$version.log
-# popd
+#$python -m pip install -v --log $install_tgt/build.log --no-build-isolation --prefix $install_tgt gpaw==$gpaw_version
+
+# Get GPAW from git at specified release branch
+git clone --depth 1 --branch $gpaw_git_version https://gitlab.com/gpaw/gpaw.git $tmp_gpaw_git
+pushd $tmp_gpaw_git
+
+# Apply patches
+patch -p1 < $setup_dir/test_gauss_func.patch
+patch -p1 < $setup_dir/test_nosave_projections.patch
+
+$python -m pip install --verbose --prefix $install_tgt . 2>&1 | tee $install_tgt/build-gpaw-$version.log
+popd
 
 # Install pytest: don't do it! Otherwise pytest prepends this path to sys.path when run -> big mess with other modules!
 # $python -m pip install --prefix $install_tgt pytest
