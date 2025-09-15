@@ -1,0 +1,13 @@
+diff --git a/gpaw/test/noncollinear/test_spin_dir_constraint.py b/gpaw/test/noncollinear/test_spin_dir_constraint.py
+index 123eb6b0a6..2863b44030 100644
+--- a/gpaw/test/noncollinear/test_spin_dir_constraint.py
++++ b/gpaw/test/noncollinear/test_spin_dir_constraint.py
+@@ -10,7 +10,7 @@ from gpaw.new.ase_interface import GPAW
+ 
+ @pytest.mark.soc
+ @pytest.mark.skipif(world.size > 1, reason='Gamma-point calculation.')
+-def test_spin_dir_constraint_H():
++def test_spin_dir_constraint_H(in_tmp_dir):
+ 
+     c = 2.5  # Å
+     atom = Atoms('H', scaled_positions=[[0.5, 0.5, 0.5]],

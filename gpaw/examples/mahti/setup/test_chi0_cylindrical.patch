@@ -1,0 +1,13 @@
+diff --git a/gpaw/test/response/test_chi0_cylindrical.py b/gpaw/test/response/test_chi0_cylindrical.py
+index 4da2ccd6ba..e2490e02de 100644
+--- a/gpaw/test/response/test_chi0_cylindrical.py
++++ b/gpaw/test/response/test_chi0_cylindrical.py
+@@ -6,7 +6,7 @@ from gpaw.response.qpd import SingleCylQPWDescriptor
+ 
+ 
+ @pytest.mark.response
+-def test_response_gw_MoS2_cut(gpw_files):
++def test_response_gw_MoS2_cut(in_tmp_dir, gpw_files):
+     ecut_sphere = 50.0
+ 
+     DFs = DielectricFunction(calc=gpw_files['mos2_pw'],
