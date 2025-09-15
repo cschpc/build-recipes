@@ -5,7 +5,7 @@ host=$(hostname)
 if [[ $host == puhti* ]]; then
     sbatch_args="-p small --mem-per-cpu=4G"
 elif [[ $host == mahti* ]]; then
-    sbatch_args="-p medium --mem=0"
+    sbatch_args="-p small --mem-per-cpu=4G"
 fi
 
 # Test target
@@ -38,7 +38,8 @@ fi
 echo "--------------------------------------------------------------------------------"
 echo "- Set paths"
 echo "--------------------------------------------------------------------------------"
-test_dir=$(gpaw info | grep '| gpaw' | awk '{print $3}')/test
+# should point to site-packages/gpaw/test of your new test install
+test_dir=$(pip show gpaw | grep 'Location' | awk '{print $2}')/gpaw/test
 echo "GPAW test files: $test_dir"
 root_dir=$PWD/tmp/${tgt}_pytest_runs
 echo "root directory for tests: $root_dir"
