@@ -93,7 +93,7 @@ function submit_job {
 
 
 for n in 1 2 4 8; do
-    submit_job "gpaw_pytest_n$n" "$n" "pytest -v"
-    submit_job "gpaw_pytest_n$n-gp" "$n" "gpaw-python -m pytest -v"
+    submit_job "gpaw_pytest_n$n" "$n" "pytest -vs"
+    submit_job "gpaw_pytest_n$n-gp" "$n" "gpaw-python -m pytest -vs"
 done
 
