@@ -3,9 +3,9 @@
 host=$(hostname)
 
 if [[ $host == puhti* ]]; then
-    sbatch_args="-p small --mem-per-cpu=4G"
+    sbatch_args="-p small --mem-per-cpu=8G"
 elif [[ $host == mahti* ]]; then
-    sbatch_args="-p small --mem-per-cpu=4G"
+    sbatch_args="-p small --mem-per-cpu=8G"
 fi
 
 # Test target
