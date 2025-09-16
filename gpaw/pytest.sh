@@ -1,13 +1,5 @@
 #!/bin/bash
 
-host=$(hostname)
-
-if [[ $host == puhti* ]]; then
-    sbatch_args="-p small --mem-per-cpu=8G"
-elif [[ $host == mahti* ]]; then
-    sbatch_args="-p small --mem-per-cpu=8G"
-fi
-
 # Test target
 tgt=gpaw_test_3
 
@@ -76,9 +68,20 @@ function submit_job {
     name="$1"
     n="$2"
     cmd="$3"
-    run_dir=$root_dir/$name
+    tests="${4:-test/}"
+    run_name="${name}_${tests}"
+    run_name="${run_name// /_}"
+    run_name="${run_name//=/_}"
+    run_name="${run_name//\//.}"
+
+    run_dir=$root_dir/$run_name
     cache_dir=$run_dir/pytest_cache
     tmp_dir=$run_dir/pytest_tmp
+
+    sbatch_args="--mem-per-cpu=4G"
+    if [[ $n -eq 1 ]]; then
+        sbatch_args="--mem-per-cpu=8G"
+    fi
 
     rm -rf $run_dir
     mkdir -p $run_dir
@@ -87,13 +90,18 @@ function submit_job {
     cp -r $test_dir ./
     mkdir -p $cache_dir/d
     cp -r $gpw_files $cache_dir/d/
-    sbatch -J $name -o slurm.out -t 04:00:00 -N 1 -n $n --cpus-per-task=1 $sbatch_args --wrap="gpaw info; srun $cmd --disable-pytest-warnings -o cache_dir=$cache_dir --basetemp=$tmp_dir test/; rm -r $tmp_dir $cache_dir test/"
+    sbatch -J $name -o slurm.out -t 04:00:00 -N 1 -n $n --cpus-per-task=1 -p small $sbatch_args --wrap="gpaw info; srun $cmd --disable-pytest-warnings -o cache_dir=$cache_dir --basetemp=$tmp_dir $tests; rm -r $tmp_dir $cache_dir test/"
     popd
 }
 
 
 for n in 1 2 4 8; do
-    submit_job "gpaw_pytest_n$n" "$n" "pytest -vs"
-    submit_job "gpaw_pytest_n$n-gp" "$n" "gpaw-python -m pytest -vs"
+    tests="--ignore=test/response/test_coulomb.py --ignore=test/vdw/ test/"
+    submit_job "gpaw_pytest_n$n" "$n" "pytest -vs" "$tests"
+    submit_job "gpaw_pytest_n$n-gp" "$n" "gpaw-python -m pytest -vs" "$tests"
+
+    tests="test/vdw/"
+    submit_job "gpaw_pytest_n$n" "$n" "pytest -vs" "$tests"
+    submit_job "gpaw_pytest_n$n-gp" "$n" "gpaw-python -m pytest -vs" "$tests"
 done
 
