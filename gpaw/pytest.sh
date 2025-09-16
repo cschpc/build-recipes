@@ -68,6 +68,7 @@ function submit_job {
     name="$1"
     n="$2"
     cmd="$3"
+    # ??? FIXME: Generates very long dir names
     tests="${4:-test/}"
     run_name="${name}_${tests}"
     run_name="${run_name// /_}"
@@ -95,6 +96,10 @@ function submit_job {
 }
 
 
+# Run tests. Version 25.7 had some issues that we didn't manage to fix with patches:
+#   1. OOM in test_coulomb.py (and occasionally in some other tests too)
+#   2. Van der Waals tests (libvdwxc) fail if ran in the same run with other tests
+# So here we skip the OOM test, and run VdW tests in a separate run.
 for n in 1 2 4 8; do
     tests="--ignore=test/response/test_coulomb.py --ignore=test/vdw/ test/"
     submit_job "gpaw_pytest_n$n" "$n" "pytest -vs" "$tests"
@@ -104,4 +109,3 @@ for n in 1 2 4 8; do
     submit_job "gpaw_pytest_n$n" "$n" "pytest -vs" "$tests"
     submit_job "gpaw_pytest_n$n-gp" "$n" "gpaw-python -m pytest -vs" "$tests"
 done
-
