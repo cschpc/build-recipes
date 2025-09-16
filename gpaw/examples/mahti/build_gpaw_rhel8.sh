@@ -90,6 +90,7 @@ pushd $tmp_gpaw_git
 patch -p1 < $setup_dir/test_chi0_cylindrical.patch
 patch -p1 < $setup_dir/test_spin_dir_constraint.patch
 patch -p1 < $setup_dir/test_borncharges.patch
+patch -p1 < $setup_dir/test_compare.patch
 
 $python -m pip install --verbose --prefix $install_tgt . 2>&1 | tee $install_tgt/build-gpaw-$version.log
 popd
