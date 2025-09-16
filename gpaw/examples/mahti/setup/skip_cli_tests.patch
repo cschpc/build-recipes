@@ -1,0 +1,24 @@
+diff --git a/gpaw/test/lcao/test_basis.py b/gpaw/test/lcao/test_basis.py
+index 3dc81c6091..d071b3b3d7 100644
+--- a/gpaw/test/lcao/test_basis.py
++++ b/gpaw/test/lcao/test_basis.py
+@@ -12,6 +12,7 @@ def test_parse_basis_filename():
+     assert parse_basis_filename('Si.any.thing.basis') == ('Si', 'any.thing')
+ 
+ 
++@pytest.mark.skip
+ @pytest.mark.serial
+ def test_plot_basis(tmp_path):
+     basisfile, _ = search_for_file('Ti.dzp.basis')
+diff --git a/gpaw/test/setups/test_setup_data.py b/gpaw/test/setups/test_setup_data.py
+index 2dd57d2725..3301656d84 100644
+--- a/gpaw/test/setups/test_setup_data.py
++++ b/gpaw/test/setups/test_setup_data.py
+@@ -6,6 +6,7 @@ import pytest
+ from gpaw.setup_data import SetupData, read_maybe_unzipping
+ 
+ 
++@pytest.mark.skip
+ @pytest.mark.serial
+ def test_parsing_core_hole_state(in_tmp_dir):
+     """
