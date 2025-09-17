@@ -1,0 +1,13 @@
+diff --git a/gpaw/test/parallel/test_compare.py b/gpaw/test/parallel/test_compare.py
+index ce06f85ca1..d21cb4b043 100644
+--- a/gpaw/test/parallel/test_compare.py
++++ b/gpaw/test/parallel/test_compare.py
+@@ -3,7 +3,7 @@ from gpaw import GPAW
+ from gpaw.mpi import rank, size
+ 
+ 
+-def test_parallel_compare():
++def test_parallel_compare(in_tmp_dir):
+     a = 3.0
+     H = Atoms('H',
+               cell=(a, a, a),

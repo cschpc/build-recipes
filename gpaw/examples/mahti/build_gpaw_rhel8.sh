@@ -9,8 +9,8 @@ module purge
 
 main_dir=$PWD
 
-ase_version=3.24.0
-gpaw_version=25.1.0
+ase_version=3.25.0
+gpaw_version=25.7.0
 gpaw_git_version=${gpaw_version}
 #openmp=""
 openmp="-omp"
@@ -85,8 +85,13 @@ git clone --depth 1 --branch $gpaw_git_version https://gitlab.com/gpaw/gpaw.git 
 pushd $tmp_gpaw_git
 
 # Apply patches
-patch -p1 < $setup_dir/test_gauss_func.patch
-patch -p1 < $setup_dir/test_nosave_projections.patch
+#patch -p1 < $setup_dir/test_gauss_func.patch
+#patch -p1 < $setup_dir/test_nosave_projections.patch
+patch -p1 < $setup_dir/test_chi0_cylindrical.patch
+patch -p1 < $setup_dir/test_spin_dir_constraint.patch
+patch -p1 < $setup_dir/test_borncharges.patch
+patch -p1 < $setup_dir/test_compare.patch
+patch -p1 < $setup_dir/skip_cli_tests.patch
 
 $python -m pip install --verbose --prefix $install_tgt . 2>&1 | tee $install_tgt/build-gpaw-$version.log
 popd

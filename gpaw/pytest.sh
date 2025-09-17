@@ -1,13 +1,5 @@
 #!/bin/bash
 
-host=$(hostname)
-
-if [[ $host == puhti* ]]; then
-    sbatch_args="-p small --mem-per-cpu=4G"
-elif [[ $host == mahti* ]]; then
-    sbatch_args="-p medium --mem=0"
-fi
-
 # Test target
 tgt=gpaw_test_3
 
@@ -38,7 +30,8 @@ fi
 echo "--------------------------------------------------------------------------------"
 echo "- Set paths"
 echo "--------------------------------------------------------------------------------"
-test_dir=$(gpaw info | grep '| gpaw' | awk '{print $3}')/test
+# should point to site-packages/gpaw/test of your new test install
+test_dir=$(pip show gpaw | grep 'Location' | awk '{print $2}')/gpaw/test
 echo "GPAW test files: $test_dir"
 root_dir=$PWD/tmp/${tgt}_pytest_runs
 echo "root directory for tests: $root_dir"
@@ -75,24 +68,44 @@ function submit_job {
     name="$1"
     n="$2"
     cmd="$3"
-    run_dir=$root_dir/$name
+    # ??? FIXME: Generates very long dir names
+    tests="${4:-test/}"
+    run_name="${name}_${tests}"
+    run_name="${run_name// /_}"
+    run_name="${run_name//=/_}"
+    run_name="${run_name//\//.}"
+
+    run_dir=$root_dir/$run_name
     cache_dir=$run_dir/pytest_cache
     tmp_dir=$run_dir/pytest_tmp
+
+    sbatch_args="--mem-per-cpu=4G"
+    if [[ $n -eq 1 ]]; then
+        sbatch_args="--mem-per-cpu=8G"
+    fi
 
     rm -rf $run_dir
     mkdir -p $run_dir
     pushd $run_dir
     echo "run dir: $run_dir"
-    cp -r $test_dir ./
+    ln -s $(readlink -f $test_dir) ./
     mkdir -p $cache_dir/d
-    cp -r $gpw_files $cache_dir/d/
-    sbatch -J $name -o slurm.out -t 04:00:00 -N 1 -n $n --cpus-per-task=1 $sbatch_args --wrap="gpaw info; srun $cmd --disable-pytest-warnings -o cache_dir=$cache_dir --basetemp=$tmp_dir test/; rm -r $tmp_dir $cache_dir test/"
+    ln -s $(readlink -f $gpw_files) $cache_dir/d/
+    sbatch -J $name -o slurm.out -t 04:00:00 -N 1 -n $n --cpus-per-task=1 -p small $sbatch_args --wrap="gpaw info; srun $cmd --disable-pytest-warnings -o cache_dir=$cache_dir --basetemp=$tmp_dir $tests; rm -rf $tmp_dir"
     popd
 }
 
 
+# Run tests. Version 25.7 had some issues that we didn't manage to fix with patches:
+#   1. OOM in test_coulomb.py (and occasionally in some other tests too)
+#   2. Van der Waals tests (libvdwxc) fail if ran in the same run with other tests
+# So here we skip the OOM test, and run VdW tests in a separate run.
 for n in 1 2 4 8; do
-    submit_job "gpaw_pytest_n$n" "$n" "pytest -v"
-    submit_job "gpaw_pytest_n$n-gp" "$n" "gpaw-python -m pytest -v"
-done
+    tests="--ignore=test/response/test_coulomb.py --ignore=test/vdw/ test/"
+    submit_job "gpaw_pytest_n$n" "$n" "pytest -vs" "$tests"
+    submit_job "gpaw_pytest_n$n-gp" "$n" "gpaw-python -m pytest -vs" "$tests"
 
+    tests="test/vdw/"
+    submit_job "gpaw_pytest_n$n" "$n" "pytest -vs" "$tests"
+    submit_job "gpaw_pytest_n$n-gp" "$n" "gpaw-python -m pytest -vs" "$tests"
+done
