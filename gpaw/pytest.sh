@@ -80,8 +80,10 @@ function submit_job {
     tmp_dir=$run_dir/pytest_tmp
 
     sbatch_args="--mem-per-cpu=4G"
+    srun="srun"
     if [[ $n -eq 1 ]]; then
         sbatch_args="--mem-per-cpu=8G"
+        srun=""
     fi
 
     rm -rf $run_dir
@@ -91,7 +93,7 @@ function submit_job {
     ln -s $(readlink -f $test_dir) ./
     mkdir -p $cache_dir/d
     ln -s $(readlink -f $gpw_files) $cache_dir/d/
-    sbatch -J $name -o slurm.out -t 04:00:00 -N 1 -n $n --cpus-per-task=1 -p small $sbatch_args --wrap="gpaw info; srun $cmd --disable-pytest-warnings -o cache_dir=$cache_dir --basetemp=$tmp_dir $tests; rm -rf $tmp_dir"
+    sbatch -J $name -o slurm.out -t 04:00:00 -N 1 -n $n --cpus-per-task=1 -p small $sbatch_args --wrap="gpaw info; $srun $cmd --disable-pytest-warnings -o cache_dir=$cache_dir --basetemp=$tmp_dir $tests; rm -rf $tmp_dir"
     popd
 }
 
