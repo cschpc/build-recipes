@@ -110,4 +110,5 @@ for n in 1 2 4 8; do
     tests="test/vdw/"
     submit_job "gpaw_pytest_n$n" "$n" "pytest -vs" "$tests"
     submit_job "gpaw_pytest_n$n-gp" "$n" "gpaw-python -m pytest -vs" "$tests"
+    # TODO: some tests are triggered only with export GPAW_NEW=1
 done
