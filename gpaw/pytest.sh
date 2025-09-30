@@ -79,6 +79,9 @@ function submit_job {
     cache_dir=$run_dir/pytest_cache
     tmp_dir=$run_dir/pytest_tmp
 
+    # Hack around https://gitlab.com/gpaw/gpaw/-/issues/1441: some tests use
+    # subprocesses and fail depending on MPI configuration. They are all
+    # serial tests, so we can just run them without srun
     sbatch_args="--mem-per-cpu=4G"
     srun="srun"
     if [[ $n -eq 1 ]]; then
