@@ -79,9 +79,14 @@ function submit_job {
     cache_dir=$run_dir/pytest_cache
     tmp_dir=$run_dir/pytest_tmp
 
+    # Hack around https://gitlab.com/gpaw/gpaw/-/issues/1441: some tests use
+    # subprocesses and fail depending on MPI configuration. They are all
+    # serial tests, so we can just run them without srun
     sbatch_args="--mem-per-cpu=4G"
+    srun="srun"
     if [[ $n -eq 1 ]]; then
         sbatch_args="--mem-per-cpu=8G"
+        srun=""
     fi
 
     rm -rf $run_dir
@@ -91,7 +96,7 @@ function submit_job {
     ln -s $(readlink -f $test_dir) ./
     mkdir -p $cache_dir/d
     ln -s $(readlink -f $gpw_files) $cache_dir/d/
-    sbatch -J $name -o slurm.out -t 04:00:00 -N 1 -n $n --cpus-per-task=1 -p small $sbatch_args --wrap="gpaw info; srun $cmd --disable-pytest-warnings -o cache_dir=$cache_dir --basetemp=$tmp_dir $tests; rm -rf $tmp_dir"
+    sbatch -J $name -o slurm.out -t 04:00:00 -N 1 -n $n --cpus-per-task=1 -p small $sbatch_args --wrap="gpaw info; $srun $cmd --disable-pytest-warnings -o cache_dir=$cache_dir --basetemp=$tmp_dir $tests; rm -rf $tmp_dir"
     popd
 }
 
@@ -108,4 +113,5 @@ for n in 1 2 4 8; do
     tests="test/vdw/"
     submit_job "gpaw_pytest_n$n" "$n" "pytest -vs" "$tests"
     submit_job "gpaw_pytest_n$n-gp" "$n" "gpaw-python -m pytest -vs" "$tests"
+    # TODO: some tests are triggered only with export GPAW_NEW=1
 done
