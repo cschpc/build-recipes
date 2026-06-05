@@ -55,6 +55,7 @@ fi
 
 tmp=$TMPDIR/gpaw_build
 tmp_gpaw_git=$tmp/gpaw
+tmp_dftd3=$tmp/dftd3
 rm -rf $tmp
 # trap "rm -rf $tmp" EXIT
 
@@ -98,6 +99,16 @@ popd
 
 # Install pytest: don't do it! Otherwise pytest prepends this path to sys.path when run -> big mess with other modules!
 # $python -m pip install --prefix $install_tgt pytest
+
+# Install DFTD3
+mkdir -p $tmp_dftd3
+pushd $tmp_dftd3
+wget https://www.chemie.uni-bonn.de/grimme/de/software/dft-d3/dftd3.tgz
+tar xf dftd3.tgz
+make 2>&1 | tee $install_tgt/dftd3.log
+cp -v dftd3 $install_tgt/bin/
+popd
+
 
 # Create the module
 depend_clause=""
