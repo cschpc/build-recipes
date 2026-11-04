@@ -1,5 +1,3 @@
-# syntax=docker/dockerfile:1
-#
 # Build environment for Runko (HIP backend). Mount your source tree in and
 # build inside the container. Does NOT build Runko itself.
 #
@@ -13,13 +11,14 @@
 
 FROM ubuntu:24.04
 ENV DEBIAN_FRONTEND=noninteractive
+ENV ROCTHRUST_INSTALL_PREFIX="/rocthrust-cpu"
 
 # Toolchain: GCC 14 (for the tested libstdc++), OpenMPI, Python, build tools.
 RUN apt-get update && apt-get install -y --no-install-recommends \
         software-properties-common ca-certificates gnupg wget git \
         build-essential \
-        libopenmpi-dev openmpi-bin \
-        python3 python3-dev python3-venv python3-pip \
+        libopenmpi-dev openmpi-bin libboost-all-dev \
+        python3 python3-dev python3-venv python3-pip cmake \
     && add-apt-repository -y ppa:ubuntu-toolchain-r/test \
     && apt-get update && apt-get install -y --no-install-recommends \
         gcc-14 g++-14 \
@@ -41,6 +40,21 @@ RUN mkdir -p /etc/apt/keyrings \
         rocm-hip-sdk \
     && rm -rf /var/lib/apt/lists/*
 
+# CPU backend for tyvi requires rocthrust
+RUN  git clone --no-checkout --depth=1 --filter=tree:0 https://github.com/ROCm/rocm-libraries.git \
+     && cd rocm-libraries \
+     && git sparse-checkout init --cone \
+     && git sparse-checkout set projects/rocthrust \
+     && git checkout develop  \
+     && cd projects/rocthrust \
+     && cmake \
+        -Bbuild \
+        -S . \
+        -DTHRUST_DEVICE_SYSTEM=CPP \
+        -DLINK_HIP_DEVICE_LIBS=OFF \
+        -DCMAKE_INSTALL_PREFIX="$ROCTHRUST_INSTALL_PREFIX" \
+     && make -C build install
+
 ENV ROCM_PATH="/opt/rocm"
 ENV PATH="/opt/rocm/bin:${PATH}"
 ENV CMAKE_PREFIX_PATH="/opt/rocm"
@@ -51,7 +65,7 @@ ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv "$VIRTUAL_ENV"
 ENV PATH="$VIRTUAL_ENV/bin:${PATH}"
 RUN pip install --no-cache-dir --upgrade \
-        pip "cmake>=3.23" ninja scikit-build-core pybind11
+        pip ninja scikit-build-core pybind11 numpy scipy
 
 # mpi4py built against this image's mpicc (a mismatched MPI causes problems).
 RUN MPI4PY_BUILD_MPICC=mpicc \
