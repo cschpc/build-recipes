@@ -56,4 +56,4 @@ $dir/run.sh bash -c "\
         -Drocthrust_DIR=${rocthrust_dir} \
         -DAMDGPU_TARGETS=${amdgpu_targets} \
     && \
-    cmake --build ${build_dir} -j 1"
+    cmake --build ${build_dir} -j 10"

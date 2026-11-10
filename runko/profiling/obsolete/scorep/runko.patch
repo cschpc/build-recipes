@@ -1,0 +1,150 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 525edbc6..f5975db5 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -2,40 +2,40 @@
+ # SPDX-License-Identifier: GPL-3.0-or-later
+ 
+ set (TOOLS_FILES
+-     ./runko/bindings/pytools.c++
+-     ./runko/tools/config_parser.c++
+-     ./runko/tools/system.c++
++     ./runko/bindings/pytools.cpp
++     ./runko/tools/config_parser.cpp
++     ./runko/tools/system.cpp
+      )
+ 
+ set (EMF_FILES
+-     ./runko/bindings/pyemf.c++
+-     ./runko/emf/tile.c++
+-     ./runko/emf/virtual_tile.c++
+-     ./runko/emf/yee_lattice.c++
+-     ./runko/emf/yee_lattice_FDTD2.c++
+-     ./runko/emf/yee_lattice_stencil.c++
+-     ./runko/emf/yee_lattice_current_filter_binomial2.c++
++     ./runko/bindings/pyemf.cpp
++     ./runko/emf/tile.cpp
++     ./runko/emf/virtual_tile.cpp
++     ./runko/emf/yee_lattice.cpp
++     ./runko/emf/yee_lattice_FDTD2.cpp
++     ./runko/emf/yee_lattice_stencil.cpp
++     ./runko/emf/yee_lattice_current_filter_binomial2.cpp
+      )
+ 
+ set (PIC_FILES
+-     ./runko/bindings/pypic.c++
+-     ./runko/pic/tile.c++
+-     ./runko/pic/tile_communication.c++
+-     ./runko/pic/virtual_tile.c++
+-     ./runko/pic/particle.c++
+-     ./runko/pic/particle_current_zigzag_1st.c++
+-     ./runko/pic/reflector_wall.c++
++     ./runko/bindings/pypic.cpp
++     ./runko/pic/tile.cpp
++     ./runko/pic/tile_communication.cpp
++     ./runko/pic/virtual_tile.cpp
++     ./runko/pic/particle.cpp
++     ./runko/pic/particle_current_zigzag_1st.cpp
++     ./runko/pic/reflector_wall.cpp
+      )
+ 
+ set (IO_FILES
+-     ./runko/io/snapshots/mpiio_fields.c++
+-     ./runko/io/snapshots/mpiio_particles.c++
+-     ./runko/io/snapshots/mpiio_spectra.c++
++     ./runko/io/snapshots/mpiio_fields.cpp
++     ./runko/io/snapshots/mpiio_particles.cpp
++     ./runko/io/snapshots/mpiio_spectra.cpp
+     )
+ 
+ 
+ pybind11_add_module(runko_cpp_bindings
+-    ./runko/bindings/runko_cpp_bindings.c++
++    ./runko/bindings/runko_cpp_bindings.cpp
+     ${TOOLS_FILES}
+     ${EMF_FILES}
+     ${PIC_FILES}
+diff --git a/src/runko/bindings/pyemf.c++ b/src/runko/bindings/pyemf.cpp
+similarity index 100%
+rename from src/runko/bindings/pyemf.c++
+rename to src/runko/bindings/pyemf.cpp
+diff --git a/src/runko/bindings/pypic.c++ b/src/runko/bindings/pypic.cpp
+similarity index 100%
+rename from src/runko/bindings/pypic.c++
+rename to src/runko/bindings/pypic.cpp
+diff --git a/src/runko/bindings/pytools.c++ b/src/runko/bindings/pytools.cpp
+similarity index 100%
+rename from src/runko/bindings/pytools.c++
+rename to src/runko/bindings/pytools.cpp
+diff --git a/src/runko/bindings/runko_cpp_bindings.c++ b/src/runko/bindings/runko_cpp_bindings.cpp
+similarity index 100%
+rename from src/runko/bindings/runko_cpp_bindings.c++
+rename to src/runko/bindings/runko_cpp_bindings.cpp
+diff --git a/src/runko/emf/tile.c++ b/src/runko/emf/tile.cpp
+similarity index 100%
+rename from src/runko/emf/tile.c++
+rename to src/runko/emf/tile.cpp
+diff --git a/src/runko/emf/virtual_tile.c++ b/src/runko/emf/virtual_tile.cpp
+similarity index 100%
+rename from src/runko/emf/virtual_tile.c++
+rename to src/runko/emf/virtual_tile.cpp
+diff --git a/src/runko/emf/yee_lattice.c++ b/src/runko/emf/yee_lattice.cpp
+similarity index 100%
+rename from src/runko/emf/yee_lattice.c++
+rename to src/runko/emf/yee_lattice.cpp
+diff --git a/src/runko/emf/yee_lattice_FDTD2.c++ b/src/runko/emf/yee_lattice_FDTD2.cpp
+similarity index 100%
+rename from src/runko/emf/yee_lattice_FDTD2.c++
+rename to src/runko/emf/yee_lattice_FDTD2.cpp
+diff --git a/src/runko/emf/yee_lattice_current_filter_binomial2.c++ b/src/runko/emf/yee_lattice_current_filter_binomial2.cpp
+similarity index 100%
+rename from src/runko/emf/yee_lattice_current_filter_binomial2.c++
+rename to src/runko/emf/yee_lattice_current_filter_binomial2.cpp
+diff --git a/src/runko/emf/yee_lattice_stencil.c++ b/src/runko/emf/yee_lattice_stencil.cpp
+similarity index 100%
+rename from src/runko/emf/yee_lattice_stencil.c++
+rename to src/runko/emf/yee_lattice_stencil.cpp
+diff --git a/src/runko/io/snapshots/mpiio_fields.c++ b/src/runko/io/snapshots/mpiio_fields.cpp
+similarity index 100%
+rename from src/runko/io/snapshots/mpiio_fields.c++
+rename to src/runko/io/snapshots/mpiio_fields.cpp
+diff --git a/src/runko/io/snapshots/mpiio_particles.c++ b/src/runko/io/snapshots/mpiio_particles.cpp
+similarity index 100%
+rename from src/runko/io/snapshots/mpiio_particles.c++
+rename to src/runko/io/snapshots/mpiio_particles.cpp
+diff --git a/src/runko/io/snapshots/mpiio_spectra.c++ b/src/runko/io/snapshots/mpiio_spectra.cpp
+similarity index 100%
+rename from src/runko/io/snapshots/mpiio_spectra.c++
+rename to src/runko/io/snapshots/mpiio_spectra.cpp
+diff --git a/src/runko/pic/particle.c++ b/src/runko/pic/particle.cpp
+similarity index 100%
+rename from src/runko/pic/particle.c++
+rename to src/runko/pic/particle.cpp
+diff --git a/src/runko/pic/particle_current_zigzag_1st.c++ b/src/runko/pic/particle_current_zigzag_1st.cpp
+similarity index 100%
+rename from src/runko/pic/particle_current_zigzag_1st.c++
+rename to src/runko/pic/particle_current_zigzag_1st.cpp
+diff --git a/src/runko/pic/reflector_wall.c++ b/src/runko/pic/reflector_wall.cpp
+similarity index 100%
+rename from src/runko/pic/reflector_wall.c++
+rename to src/runko/pic/reflector_wall.cpp
+diff --git a/src/runko/pic/tile.c++ b/src/runko/pic/tile.cpp
+similarity index 100%
+rename from src/runko/pic/tile.c++
+rename to src/runko/pic/tile.cpp
+diff --git a/src/runko/pic/tile_communication.c++ b/src/runko/pic/tile_communication.cpp
+similarity index 100%
+rename from src/runko/pic/tile_communication.c++
+rename to src/runko/pic/tile_communication.cpp
+diff --git a/src/runko/pic/virtual_tile.c++ b/src/runko/pic/virtual_tile.cpp
+similarity index 100%
+rename from src/runko/pic/virtual_tile.c++
+rename to src/runko/pic/virtual_tile.cpp
+diff --git a/src/runko/tools/config_parser.c++ b/src/runko/tools/config_parser.cpp
+similarity index 100%
+rename from src/runko/tools/config_parser.c++
+rename to src/runko/tools/config_parser.cpp
+diff --git a/src/runko/tools/system.c++ b/src/runko/tools/system.cpp
+similarity index 100%
+rename from src/runko/tools/system.c++
+rename to src/runko/tools/system.cpp

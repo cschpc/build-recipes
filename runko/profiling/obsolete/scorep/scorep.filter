@@ -1,0 +1,29 @@
+# Initial filter file, starting point for further adaptation.
+#
+# Considerations:
+#  - check possible wildcard options
+#  - check selected functions for relevancy
+#    (w.r.t. your knowledge of the application)
+#
+# Generated with the following parameters:
+#  - A region has to use at least 1% of the estimated trace buffer.
+#  - A region has to have a time/visits value of less than 1 us.
+#  - A region that is of type USR.
+#
+# The file contains comments for each region providing additional information
+# regarding the respective region.
+# The entries are sorted by `maxbuffer`.
+# The common prefix for the files is:
+# '/'
+#
+# Please refer to the Score-P user guide for more options on filtering.
+SCOREP_REGION_NAMES_BEGIN
+  EXCLUDE 
+         hipGetLastError
+         __hipPushCallConfiguration
+         __hipPopCallConfiguration
+         hipStreamWaitEvent
+         hipPeekAtLastError
+         hipGetDevice
+         hipGetDevicePropertiesR0600
+SCOREP_REGION_NAMES_END

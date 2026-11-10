@@ -1,0 +1,117 @@
+diff --git a/src/runko/pic/particle.h b/src/runko/pic/particle.h
+index 30c5e71a..9e37f78f 100644
+--- a/src/runko/pic/particle.h
++++ b/src/runko/pic/particle.h
+@@ -228,7 +228,7 @@ public:
+   void current_zigzag_1st(
+     runko::VecGrid<emf::YeeLattice::value_type>& Jout,
+     const std::array<value_type, 3> lattice_origo_coordinates,
+-    const double cfl) const;
++    const double cfl);
+ 
+ 
+   /// Reflect particles crossing a wall and deposit correction currents.
+diff --git a/src/runko/pic/particle_current_zigzag_1st.c++ b/src/runko/pic/particle_current_zigzag_1st.c++
+index d31d4c7b..78096e8b 100644
+--- a/src/runko/pic/particle_current_zigzag_1st.c++
++++ b/src/runko/pic/particle_current_zigzag_1st.c++
+@@ -15,7 +15,9 @@
+ 
+ #include <array>
+ #include <cstdint>
++#include <fstream>
+ #include <functional>
++#include <ios>
+ #include <iterator>
+ #include <stdexcept>
+ #include <utility>
+@@ -225,8 +227,9 @@ void
+   ParticleContainer::current_zigzag_1st(
+     runko::VecGrid<emf::YeeLattice::value_type>& Jout,
+     const std::array<value_type, 3> lattice_origo_coordinates,
+-    const double cfl_) const
++    const double cfl_)
+ {
++    static uint32_t call_counter = 0u;
+   using Vec3i = toolbox::Vec3<uint32_t>;
+   using Vec3v = toolbox::Vec3<value_type>;
+ 
+@@ -237,8 +240,14 @@ void
+   const value_type charge = static_cast<value_type>(charge_);
+   const value_type cfl    = static_cast<value_type>(cfl_);
+ 
+-  tyvi::mdgrid_work {}
+-    .for_each_index(
++  runko::VecList<Vec3i> inds1(this->size());
++  runko::VecList<Vec3i> inds2(this->size());
++  auto inds_mds1 = inds1.mds();
++  auto inds_mds2 = inds2.mds();
++
++  auto w = tyvi::mdgrid_work {};
++
++  w.for_each_index(
+       pos_mds,
+       [=](const auto idx) {
+         if(ids_mds[idx][] == runko::dead_prtc_id) { return; }
+@@ -274,6 +283,8 @@ void
+ 
+         const auto i1 = fi1.template as<uint32_t>();
+         const auto i2 = fi2.template as<uint32_t>();
++        inds_mds1[idx][0] = i1;
++        inds_mds2[idx][0] = i2;
+ 
+         const auto W1 = value_type { 0.5 } * (x1 + x_relay) - fi1;
+         const auto W2 = value_type { 0.5 } * (x2 + x_relay) - fi2;
+@@ -333,8 +344,37 @@ void
+         store_current(i2 + Vec3i(1, 0, 1), Vec3v(0, Fy2 * Wx2 * Wz2, 0));
+         store_current(i1 + Vec3i(1, 1, 0), Vec3v(0, 0, Fz1 * Wx1 * Wy1));
+         store_current(i2 + Vec3i(1, 1, 0), Vec3v(0, 0, Fz2 * Wx2 * Wy2));
+-      })
+-    .wait();
++      });
++
++    w.sync_to_staging(inds1);
++    w.sync_to_staging(inds2);
++    w.sync_to_staging(ids_);
++
++    w.wait();
++
++    // append indices to file
++    auto write_to_file = [](auto fname, auto mds, auto idmds){
++        std::ofstream file(fname, std::ios::app | std::ios::out);
++        if (file.is_open()) {
++          bool first = true;
++          for(const auto [i]: tyvi::sstd::index_space(mds)) {
++            if(idmds[i][] == runko::dead_prtc_id) { continue; }
++            if (first) {
++                file << mds[i][0][0] << "," << mds[i][0][1] << "," << mds[i][0][2];
++                first = false;
++            } else {
++                file << "," << mds[i][0][0] << "," << mds[i][0][1] << "," << mds[i][0][2];
++            }
++          }
++          file << "\n";
++        }
++    };
++
++    // Write only species 0 (assuming two species)
++    if (0 == (call_counter++ & 1)) {
++        write_to_file("indices1.dat", inds1.staging_mds(), ids_.staging_mds());
++        write_to_file("indices2.dat", inds2.staging_mds(), ids_.staging_mds());
++    }
+ }
+ 
+ }  // namespace pic
+diff --git a/src/runko/pic/tile.c++ b/src/runko/pic/tile.c++
+index 5e21167b..0f068898 100644
+--- a/src/runko/pic/tile.c++
++++ b/src/runko/pic/tile.c++
+@@ -398,7 +398,7 @@ void
+           [=](const auto idx, const auto tidx) { genJmds[idx][tidx] = 0; })
+         .wait();
+ 
+-      for(const auto& [_, pcontainer]: this->particle_buffs_) {
++      for(auto& [_, pcontainer]: this->particle_buffs_) {
+         pcontainer.current_zigzag_1st(generated_J, origo_pos, this->cfl_);
+       }
+ 

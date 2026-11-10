@@ -1,0 +1,180 @@
+# rocprofv3 counter collection for gfx90a (MI250X)
+# Goal: first-order breakdown of where SQ time/work goes across
+#   vector / scalar / LDS / memory categories.
+#
+# All counter names below were cross-checked against this system's
+# `rocprofv3 --list-avail` output and are present for gpu-agent gfx90a.
+#
+# Usage:
+#   rocprofv3 -i counters.yaml -- ./your_app
+#
+# Per-job filtering/output fields applied to every pass:
+#   kernel_include_regex : only profile kernels matching this regex
+#   truncate_kernels     : strip argument signature from kernel name
+#   output_format        : emit CSV
+# These fields are per-job in the rocprofv3 schema, so they are repeated
+# in each pass. Output lands in pass_N/<pid>_counter_collection.csv.
+#
+# PASSES: each list item under "jobs" is ONE pass (one replay of the
+# app). Counters are grouped by category so each pass is internally
+# consistent. If a pass errors with "too many counters" for the SQ
+# block's hardware slots, split it further.
+#
+# SQ_CYCLES is repeated in every pass: it is the shared denominator, and
+# because passes are separate replays their absolute cycle totals differ.
+# Normalize WITHIN each pass, never across passes.
+#
+# REMEMBER: SQ_INSTS_* are instruction COUNTS, not cycles. Divided by
+# SQ_CYCLES they give issue rate / instruction mix, not a time split.
+# The SQ_WAIT_* and *_STALL_* counters (passes 5-6) are cycle-based and
+# are the honest "where did time go" signal — but they overlap and do
+# not partition SQ_CYCLES.
+
+jobs:
+  # ---- Pass 1: normalizers + occupancy context ----
+  - pmc:
+      - SQ_CYCLES            # denominator (per-clock over measured scope)
+      - SQ_BUSY_CYCLES       # cycles SQ had any work
+      - SQ_WAVES             # total wavefronts dispatched
+      - SQ_WAVE_CYCLES       # wave-cycles: summed over resident waves
+    kernel_include_regex: "deposit_current_kernel"
+    truncate_kernels: true
+    output_format:
+      - "csv"
+
+  # ---- Pass 2: instruction mix (counts, NOT cycles) ----
+  - pmc:
+      - SQ_CYCLES
+      - SQ_INSTS_VALU        # vector ALU instrs
+      - SQ_INSTS_SALU        # scalar ALU instrs
+      - SQ_INSTS_LDS         # LDS instrs
+      - SQ_INSTS_SMEM        # scalar memory instrs
+    kernel_include_regex: "deposit_current_kernel"
+    truncate_kernels: true
+    output_format:
+      - "csv"
+
+  # ---- Pass 3: memory instruction mix ----
+  - pmc:
+      - SQ_CYCLES
+      - SQ_INSTS_VMEM        # all vector memory instrs (aggregate)
+      - SQ_INSTS_VMEM_RD     # vector memory reads
+      - SQ_INSTS_VMEM_WR     # vector memory writes
+      - SQ_INSTS_FLAT        # flat (generic-addr) instrs
+    kernel_include_regex: "deposit_current_kernel"
+    truncate_kernels: true
+    output_format:
+      - "csv"
+
+  # ---- Pass 4: LDS conflict / atomic + stall overlay ----
+  - pmc:
+      - SQ_CYCLES
+      - SQ_LDS_ADDR_CONFLICT
+      - SQ_LDS_BANK_CONFLICT
+      - SQ_LDS_ATOMIC_RETURN
+      - SQ_LDS_UNALIGNED_STALL
+    kernel_include_regex: "deposit_current_kernel"
+    truncate_kernels: true
+    output_format:
+      - "csv"
+
+  # ---- Pass 5: SQ stall / wait cycles (TIME attribution) ----
+  # Cycle-based waits: closer to "where time went" than inst counts.
+  - pmc:
+      - SQ_CYCLES
+      - SQ_WAIT_ANY          # cycles waiting on anything
+      - SQ_WAIT_INST_ANY     # cycles waiting to issue any instr
+      - SQ_WAIT_INST_LDS     # cycles waiting to issue an LDS instr
+    kernel_include_regex: "deposit_current_kernel"
+    truncate_kernels: true
+    output_format:
+      - "csv"
+
+  # ---- Pass 6: memory hierarchy busy/stall + L2 hit/miss ----
+  - pmc:
+      - SQ_CYCLES
+      - GRBM_GUI_ACTIVE      # whole-chip active cycles (reference)
+      - TCP_TCP_LATENCY_sum  # L1 (vector cache) request latency
+      - TCP_TCP_TA_DATA_STALL_CYCLES_sum  # L1<-TA data stall
+      - TCC_HIT_sum          # L2 hits
+      - TCC_MISS_sum         # L2 misses (-> HBM traffic)
+    kernel_include_regex: "deposit_current_kernel"
+    truncate_kernels: true
+    output_format:
+      - "csv"
+
+  # ---- Pass 7: occupancy ----
+  # Derived metrics do the quad-cycle (x4) and per-CU normalization for
+  # you, so these are the values to TRUST — they respect the per-CU
+  # wavefront ceiling. MeanOccupancyPerCU averages over all CUs;
+  # MeanOccupancyPerActiveCU averages only over CUs that had work;
+  # OccupancyPercent is occupancy as a fraction of the hardware maximum.
+  #
+  # SQ_WAVE_CYCLES, SQ_CYCLES, and CU_NUM are included as the raw
+  # ingredients so you can hand-check the relationship:
+  #   occupancy ~= (SQ_WAVE_CYCLES * 4) / SQ_CYCLES / CU_NUM
+  # NOTE: SQ_WAVE_CYCLES is per-SE, in quad-cycles, and nondeterministic
+  # (per its own description), so the manual value is approximate and may
+  # not match the derived metric exactly. When they disagree, trust the
+  # derived MeanOccupancyPerCU.
+  - pmc:
+      - SQ_CYCLES
+      - SQ_WAVE_CYCLES       # quad-cycles, per-SE — raw ingredient
+      - SQ_WAVES             # dispatched wavefront count
+      - CU_NUM               # number of CUs (for the manual divisor)
+      - MeanOccupancyPerCU       # TRUST THIS
+      - MeanOccupancyPerActiveCU
+      - OccupancyPercent
+    kernel_include_regex: "deposit_current_kernel"
+    truncate_kernels: true
+    output_format:
+      - "csv"
+
+  # ---- Pass 8: global-memory atomics ----
+  # NOTE: this is GLOBAL/vector-memory atomics, distinct from the LDS
+  # atomics in pass 4 (SQ_LDS_ATOMIC_RETURN). Global atomics flow:
+  #   TA (address unit) -> TCP (L1) -> TCC (L2) -> EA (HBM interface)
+  # so the counters below walk that path from issue to memory.
+  #
+  # Issue side (how many atomic ops the kernel launches):
+  #   TA_FLAT_ATOMIC_WAVEFRONTS  - flat-addressed atomic wavefronts
+  #   TA_BUFFER_ATOMIC_WAVEFRONTS- buffer-addressed atomic wavefronts
+  # L1->L2 requests, split by whether they return a value (fetch_add
+  # etc. return; plain atomic stores do not) -- return atomics cost more:
+  #   TCP_TCC_ATOMIC_WITH_RET_REQ / _WITHOUT_RET_REQ
+  #   TCP_ATOMIC_TAGCONFLICT_STALL_CYCLES - L1 stall from atomic tag conflicts
+  # L2 / memory-interface side:
+  #   TCC_ATOMIC     - all atomic requests seen at L2
+  #   TCC_EA_ATOMIC  - atomics that go out to the EA/HBM interface
+  #   TCC_EA_ATOMIC_LEVEL - sum of in-flight EA atomics; divide by
+  #     TCC_EA_ATOMIC to get AVERAGE EA ATOMIC LATENCY (the key health
+  #     number). Rising latency at fixed request count = contention.
+  #
+  # Ratios to compute: atomics-with-ret / SQ_CYCLES (issue rate),
+  # TCC_EA_ATOMIC / TCC_ATOMIC (fraction that miss L2 and hit HBM),
+  # and TCC_EA_ATOMIC_LEVEL / TCC_EA_ATOMIC (avg latency in flight).
+  # Using _sum variants to aggregate across L1/L2 instances.
+  - pmc:
+      - SQ_CYCLES
+      - TA_FLAT_ATOMIC_WAVEFRONTS_sum
+      - TA_BUFFER_ATOMIC_WAVEFRONTS_sum
+      - TCP_TCC_ATOMIC_WITH_RET_REQ_sum
+      - TCP_TCC_ATOMIC_WITHOUT_RET_REQ_sum
+      - TCP_ATOMIC_TAGCONFLICT_STALL_CYCLES_sum
+    kernel_include_regex: "deposit_current_kernel"
+    truncate_kernels: true
+    output_format:
+      - "csv"
+
+  # ---- Pass 9: global-atomic latency at L2 / HBM interface ----
+  # Split from pass 8 to stay within counter-slot limits and because
+  # the TCC/EA latency counters are the "how are they doing" core.
+  - pmc:
+      - SQ_CYCLES
+      - TCC_ATOMIC_sum          # all atomic requests at L2
+      - TCC_EA_ATOMIC_sum       # atomics reaching the HBM interface
+      - TCC_EA_ATOMIC_LEVEL_sum # in-flight sum; /TCC_EA_ATOMIC = latency
+    kernel_include_regex: "deposit_current_kernel"
+    truncate_kernels: true
+    output_format:
+      - "csv"

@@ -1,0 +1,22 @@
+diff --git a/runko/method_wrapper.py b/runko/method_wrapper.py
+index c45492f2..84f7a2d0 100644
+--- a/runko/method_wrapper.py
++++ b/runko/method_wrapper.py
+@@ -2,6 +2,7 @@
+ # SPDX-License-Identifier: GPL-3.0-or-later
+ 
+ import inspect
++from viztracer import get_tracer
+ 
+ 
+ class MethodWrapper:
+@@ -83,7 +84,8 @@ class MethodWrapper:
+                     raise TypeError(msg)
+ 
+             self._pre(name, *vargs, **kwargs) if self._pre else None
+-            self._action(name, *vargs, **kwargs)
++            with get_tracer().log_event(name):
++                self._action(name, *vargs, **kwargs)
+             self._post(name, *vargs, **kwargs) if self._post else None
+ 
+         return wrapped_method_call

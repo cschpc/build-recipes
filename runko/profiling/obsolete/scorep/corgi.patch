@@ -1,0 +1,17 @@
+diff --git a/pycorgi/CMakeLists.txt b/pycorgi/CMakeLists.txt
+index b22a323..8fb6e05 100644
+--- a/pycorgi/CMakeLists.txt
++++ b/pycorgi/CMakeLists.txt
+@@ -1,7 +1,7 @@
+ # Copyright 2018 - 2026, Joonas Nättilä and the corgi contributors
+ # SPDX-License-Identifier: Apache-2.0
+ 
+-file (GLOB CORGI_SOURCES *.c++ *.h)
++file (GLOB CORGI_SOURCES *.cpp *.h)
+ 
+ pybind11_add_module (pycorgi ${CORGI_SOURCES})
+ target_link_libraries (pycorgi PRIVATE corgi corgi_warnings)
+diff --git a/pycorgi/pycorgi.c++ b/pycorgi/pycorgi.cpp
+similarity index 100%
+rename from pycorgi/pycorgi.c++
+rename to pycorgi/pycorgi.cpp
